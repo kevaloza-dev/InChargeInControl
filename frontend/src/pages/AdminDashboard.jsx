@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Upload, Users, List, BarChart2, LogOut } from 'lucide-react';
+import { Upload, Users, List, BarChart2, LogOut, Download } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
@@ -50,6 +50,23 @@ const AdminDashboard = () => {
     }
   };
 
+  const handleExport = async () => {
+    try {
+      const res = await axios.get('http://localhost:5000/api/admin/export', {
+        responseType: 'blob'
+      });
+      const url = window.URL.createObjectURL(new Blob([res.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', 'users_export.xlsx');
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (err) {
+      alert('Export failed');
+    }
+  };
+
   return (
     <div style={{ display: 'grid', gridTemplateColumns: '250px 1fr', minHeight: '100vh', background: 'var(--bg-primary)' }}>
       {/* Sidebar */}
@@ -96,8 +113,13 @@ const AdminDashboard = () => {
       <div style={{ padding: '40px', overflowY: 'auto' }}>
         {activeTab === 'users' && (
           <div>
-            <h1 style={{ marginBottom: '30px' }}>Users</h1>
-            <div className="glass-card" style={{ padding: '20px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
+            <h1>Users</h1>
+            <button onClick={handleExport} className="btn-secondary" style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 20px', borderRadius: '12px', border: '1px solid var(--glass-border)', background: 'var(--glass-bg)', color: 'white', cursor: 'pointer' }}>
+              <Download size={18} /> Export Users
+            </button>
+          </div>
+          <div className="glass-card" style={{ padding: '20px' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
                 <thead>
                   <tr style={{ borderBottom: '1px solid var(--glass-border)', color: 'var(--text-secondary)' }}>
@@ -154,10 +176,11 @@ const AdminDashboard = () => {
               {importSummary && (
                 <div style={{ marginTop: '30px', padding: '20px', background: 'rgba(255, 255, 255, 0.05)', borderRadius: '12px' }}>
                   <h3>Import Summary</h3>
-                  <div style={{ display: 'flex', gap: '30px', marginTop: '15px' }}>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', marginTop: '15px' }}>
                     <p><span style={{ color: 'var(--success)' }}>Success:</span> {importSummary.success}</p>
+                    <p><span style={{ color: 'var(--accent-primary)' }}>Updated:</span> {importSummary.updated}</p>
+                    <p><span style={{ color: 'var(--text-secondary)' }}>Duplicates:</span> {importSummary.duplicates}</p>
                     <p><span style={{ color: 'var(--error)' }}>Failure:</span> {importSummary.failure}</p>
-                    <p><span style={{ color: 'var(--accent-primary)' }}>Duplicates:</span> {importSummary.duplicates}</p>
                   </div>
                   {importSummary.details.length > 0 && (
                     <div style={{ marginTop: '20px', maxHeight: '200px', overflowY: 'auto' }}>

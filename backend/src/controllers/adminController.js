@@ -16,7 +16,7 @@ const bulkImport = async (req, res) => {
 
   const filePath = req.file.path;
   const results = [];
-  const summary = { success: 0, failure: 0, duplicates: 0, details: [] };
+  const summary = { success: 0, failure: 0, duplicates: 0, updated: 0, details: [] };
 
   try {
     if (req.file.originalname.endsWith('.csv')) {
@@ -32,15 +32,13 @@ const bulkImport = async (req, res) => {
       await workbook.xlsx.readFile(filePath);
       const worksheet = workbook.getWorksheet(1);
       
-      // Get headers from first row
       const headers = [];
       worksheet.getRow(1).eachCell((cell, colNumber) => {
         headers[colNumber] = cell.value;
       });
 
-      // Iterate remaining rows
       worksheet.eachRow({ includeEmpty: false }, (row, rowNumber) => {
-        if (rowNumber === 1) return; // Skip headers
+        if (rowNumber === 1) return;
         const rowData = {};
         row.eachCell((cell, colNumber) => {
           rowData[headers[colNumber]] = cell.value;
@@ -50,43 +48,68 @@ const bulkImport = async (req, res) => {
     }
 
     for (const row of results) {
-      const { Name, Email, Mobile, Company, AccessFlag } = row;
+      const normalizedRow = {};
+      Object.keys(row).forEach(key => {
+        if (key) normalizedRow[key.trim().toLowerCase()] = row[key];
+      });
 
-      if (!Name || !Email || !Mobile) {
+      const name = normalizedRow['name'];
+      const email = normalizedRow['email'];
+      const mobile = normalizedRow['mobile'];
+      const company = normalizedRow['company'];
+      const accessFlag = normalizedRow['accessflag'];
+
+      if (!name || !email || !mobile) {
         summary.failure++;
-        summary.details.push({ email: Email || 'Unknown', error: 'Missing mandatory fields' });
+        summary.details.push({ email: email || 'Unknown', error: 'Missing mandatory fields' });
         continue;
       }
 
-      const existingUser = await User.findOne({ email: Email });
+      const existingUser = await User.findOne({ email: email });
       if (existingUser) {
-        summary.duplicates++;
-        summary.details.push({ email: Email, error: 'Duplicate user' });
+        // Check if details are different
+        const isDifferent = 
+          existingUser.name !== name || 
+          existingUser.mobile !== mobile.toString() || 
+          existingUser.company !== (company || '') || 
+          existingUser.accessFlag !== (String(accessFlag).toLowerCase() === 'false' ? false : true);
+
+        if (isDifferent) {
+          existingUser.name = name;
+          existingUser.mobile = mobile.toString();
+          existingUser.company = company || '';
+          existingUser.accessFlag = String(accessFlag).toLowerCase() === 'false' ? false : true;
+          await existingUser.save();
+          summary.updated++;
+        } else {
+          summary.duplicates++;
+        }
         continue;
       }
 
-      const tempPassword = generateTempPassword(Name, Mobile);
+      const tempPassword = generateTempPassword(name.toString(), mobile.toString());
       
       try {
         await User.create({
-          name: Name,
-          email: Email,
-          mobile: Mobile,
+          name: name,
+          email: email,
+          mobile: mobile.toString(),
           password: tempPassword,
-          company: Company || '',
-          accessFlag: String(AccessFlag).toLowerCase() === 'false' ? false : true,
+          company: company || '',
+          accessFlag: String(accessFlag).toLowerCase() === 'false' ? false : true,
           firstLoginRequired: true
         });
         summary.success++;
       } catch (err) {
         summary.failure++;
-        summary.details.push({ email: Email, error: err.message });
+        summary.details.push({ email: email, error: err.message });
       }
     }
 
-    fs.unlinkSync(filePath); // Delete temporary file
+    fs.unlinkSync(filePath);
     res.json(summary);
   } catch (err) {
+    if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
     res.status(500).json({ error: 'Import failed: ' + err.message });
   }
 };
@@ -100,4 +123,47 @@ const getUsers = async (req, res) => {
   }
 };
 
-module.exports = { bulkImport, getUsers };
+const exportUsers = async (req, res) => {
+  try {
+    const users = await User.find({ role: 'user' }).select('-password');
+    
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('Users');
+
+    worksheet.columns = [
+      { header: 'Name', key: 'name', width: 25 },
+      { header: 'Email', key: 'email', width: 30 },
+      { header: 'Mobile', key: 'mobile', width: 15 },
+      { header: 'Company', key: 'company', width: 20 },
+      { header: 'Access Flag', key: 'accessFlag', width: 15 },
+      { header: 'First Login Required', key: 'firstLoginRequired', width: 20 }
+    ];
+
+    users.forEach(user => {
+      worksheet.addRow({
+        name: user.name,
+        email: user.email,
+        mobile: user.mobile,
+        company: user.company,
+        accessFlag: user.accessFlag,
+        firstLoginRequired: user.firstLoginRequired
+      });
+    });
+
+    res.setHeader(
+      'Content-Type',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    );
+    res.setHeader(
+      'Content-Disposition',
+      'attachment; filename=' + 'users_export.xlsx'
+    );
+
+    await workbook.xlsx.write(res);
+    res.end();
+  } catch (err) {
+    res.status(500).json({ error: 'Export failed' });
+  }
+};
+
+module.exports = { bulkImport, getUsers, exportUsers };

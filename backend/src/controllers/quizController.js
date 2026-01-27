@@ -16,11 +16,13 @@ const getActiveQuiz = async (req, res) => {
 
     // Check if user already attempted
     const attempt = await QuizAttempt.findOne({ userId: req.user.id, quizId: quiz._id });
-    if (attempt) {
-      return res.status(403).json({ error: 'Quiz already attempted', attempt });
-    }
-
-    res.json(quiz);
+    
+    // Return quiz and attempt data
+    res.json({
+      quiz,
+      alreadyAttempted: !!attempt,
+      attempt: attempt || null
+    });
   } catch (err) {
     res.status(500).json({ error: 'Server error' });
   }

@@ -41,11 +41,11 @@ const Ladder = ({ currentStep }) => {
       ))}
       <style>{`
         .ladder-container {
-          height: 600px;
+          height: 100%;
           display: flex;
           flex-direction: column-reverse;
           justify-content: space-between;
-          padding: 40px 0;
+          padding: 20px 0;
           position: relative;
         }
         .ladder-step {
