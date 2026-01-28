@@ -19,7 +19,7 @@ const seed = async () => {
       password: 'AdminPassword123!',
       mobile: '9999999999',
       role: 'admin',
-      firstLoginRequired: false
+      firstLoginRequired: true
     });
     console.log('Admin user created: admin@example.com / AdminPassword123!');
   }

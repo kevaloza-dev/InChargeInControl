@@ -38,6 +38,9 @@ const updatePassword = async (req, res) => {
   const { newPassword } = req.body;
   try {
     const user = await User.findById(req.user.id);
+    if (!user.firstLoginRequired) {
+      return res.status(403).json({ error: 'Password update not allowed' });
+    }
     user.password = newPassword;
     user.firstLoginRequired = false;
     await user.save();

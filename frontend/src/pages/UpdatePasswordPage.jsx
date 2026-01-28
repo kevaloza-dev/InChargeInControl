@@ -2,59 +2,110 @@ import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { Lock, ShieldCheck } from 'lucide-react';
 
 const UpdatePasswordPage = () => {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const { user, setUser } = useAuth();
   const navigate = useNavigate();
 
+  React.useEffect(() => {
+    if (user && !user.firstLoginRequired) {
+      navigate(user.role === 'admin' ? '/admin' : '/quiz');
+    }
+  }, [user, navigate]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
+    
+    if (newPassword.length < 6) {
+      return setError('Password must be at least 6 characters long');
+    }
+    
     if (newPassword !== confirmPassword) {
       return setError('Passwords do not match');
     }
 
+    setLoading(true);
     try {
       await axios.post('http://localhost:5000/api/auth/update-password', { newPassword });
       setUser({ ...user, firstLoginRequired: false });
       navigate(user.role === 'admin' ? '/admin' : '/quiz');
     } catch (err) {
-      setError('Failed to update password');
+      setError('Failed to update password. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', padding: '20px' }}>
-      <div className="glass-card" style={{ padding: '40px', width: '100%', maxWidth: '400px' }}>
-        <h2 style={{ textAlign: 'center', marginBottom: '20px' }}>Change Password</h2>
-        <p style={{ color: 'var(--text-secondary)', textAlign: 'center', marginBottom: '30px' }}>
-          Since this is your first login, you must update your password.
+    <div className="min-h-screen bg-bg-primary flex items-center justify-center p-5 relative overflow-hidden font-sans">
+      {/* Dynamic Background Elements */}
+      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-accent-primary/20 rounded-full blur-[120px] animate-float1" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-accent-secondary/20 rounded-full blur-[120px] animate-float2" />
+
+      <div className="glass-card w-full max-w-md p-8 sm:p-10 relative z-10 shadow-2xl">
+        <div className="flex justify-center mb-6">
+          <div className="w-16 h-16 bg-accent-primary/10 rounded-2xl flex items-center justify-center text-accent-primary">
+            <ShieldCheck size={32} />
+          </div>
+        </div>
+
+        <h2 className="text-3xl font-bold text-center text-white mb-2">Security Update</h2>
+        <p className="text-text-secondary text-center mb-8">
+          {user?.firstLoginRequired 
+            ? "Since this is your first login, you must update your password for security." 
+            : "Update your account password below."}
         </p>
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            <label>New Password</label>
-            <input 
-              type="password" 
-              placeholder="New password" 
-              value={newPassword} 
-              onChange={(e) => setNewPassword(e.target.value)} 
-              required 
-            />
+
+        <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+          <div className="flex flex-col gap-2">
+            <label className="text-sm font-medium text-text-secondary ml-1">New Password</label>
+            <div className="relative group">
+              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-text-secondary group-focus-within:text-accent-primary transition-colors" size={18} />
+              <input 
+                type="password" 
+                placeholder="Enter new password" 
+                value={newPassword} 
+                onChange={(e) => setNewPassword(e.target.value)} 
+                required 
+                className="input-base pl-12"
+              />
+            </div>
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            <label>Confirm Password</label>
-            <input 
-              type="password" 
-              placeholder="Confirm password" 
-              value={confirmPassword} 
-              onChange={(e) => setConfirmPassword(e.target.value)} 
-              required 
-            />
+
+          <div className="flex flex-col gap-2">
+            <label className="text-sm font-medium text-text-secondary ml-1">Confirm Password</label>
+            <div className="relative group">
+              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-text-secondary group-focus-within:text-accent-primary transition-colors" size={18} />
+              <input 
+                type="password" 
+                placeholder="Re-enter new password" 
+                value={confirmPassword} 
+                onChange={(e) => setConfirmPassword(e.target.value)} 
+                required 
+                className="input-base pl-12"
+              />
+            </div>
           </div>
-          {error && <p style={{ color: 'var(--error)', fontSize: '0.9rem' }}>{error}</p>}
-          <button type="submit" className="btn-primary">Update Password</button>
+
+          {error && (
+            <div className="p-3 bg-red-500/10 border border-red-500/20 text-error rounded-xl text-sm text-center">
+              {error}
+            </div>
+          )}
+
+          <button 
+            type="submit" 
+            disabled={loading}
+            className="btn-primary w-full mt-2"
+          >
+            {loading ? 'Updating...' : 'Update Password'}
+          </button>
         </form>
       </div>
     </div>
