@@ -108,16 +108,15 @@ const QuizEditor = ({ quiz, onSave, onCancel, readOnly = false }) => {
   };
 
   return (
-    <div className="glass-card" style={{ padding: '30px', maxWidth: '900px', margin: '0 auto' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-        <h2>{readOnly ? 'View Quiz' : (quiz ? 'Edit Quiz' : 'Create New Quiz')}</h2>
+    <div className="glass-card p-8 max-w-5xl mx-auto">
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-2xl font-bold">{readOnly ? 'View Quiz' : (quiz ? 'Edit Quiz' : 'Create New Quiz')}</h2>
         {!quiz && !readOnly && (
           <button 
             type="button" 
             onClick={handleGenerateAI} 
-            className="btn-secondary"
+            className="btn-secondary bg-gradient-to-br from-indigo-500 to-purple-500 border-none text-white hover:opacity-90"
             disabled={loading}
-            style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', color: 'white', border: 'none' }}
           >
             <Sparkles size={18} />
             {loading ? 'Generating...' : 'Generate with AI'}
@@ -126,121 +125,116 @@ const QuizEditor = ({ quiz, onSave, onCancel, readOnly = false }) => {
       </div>
 
       {error && (
-        <div style={{ padding: '10px', background: 'rgba(239, 68, 68, 0.1)', color: 'var(--error)', borderRadius: '8px', marginBottom: '20px' }}>
+        <div className="p-4 bg-red-500/10 border border-red-500/20 text-error rounded-xl mb-6">
           {error}
         </div>
       )}
 
       <form onSubmit={handleSubmit}>
-        <fieldset disabled={readOnly} style={{ border: 'none', padding: 0, margin: 0 }}>
-        <div style={{ marginBottom: '20px' }}>
-          <label style={{ display: 'block', marginBottom: '8px' }}>Quiz Title</label>
-          <input 
-            type="text" 
-            value={formData.title} 
-            onChange={(e) => setFormData({...formData, title: e.target.value})}
-            required
-            disabled={readOnly}
-          />
-        </div>
+        <fieldset disabled={readOnly} className="border-none p-0 m-0 disabled:opacity-80">
+          <div className="mb-6">
+            <label className="block text-sm font-medium text-text-secondary mb-2">Quiz Title</label>
+            <input 
+              type="text" 
+              value={formData.title} 
+              onChange={(e) => setFormData({...formData, title: e.target.value})}
+              required
+              disabled={readOnly}
+              className="input-base text-lg font-semibold"
+            />
+          </div>
 
-        <div style={{ marginBottom: '30px' }}>
-          <label style={{ display: 'block', marginBottom: '8px' }}>Description</label>
-          <textarea 
-            value={formData.description} 
-            onChange={(e) => setFormData({...formData, description: e.target.value})}
-            rows="2"
-            disabled={readOnly}
-          />
-        </div>
+          <div className="mb-8">
+            <label className="block text-sm font-medium text-text-secondary mb-2">Description</label>
+            <textarea 
+              value={formData.description} 
+              onChange={(e) => setFormData({...formData, description: e.target.value})}
+              rows="2"
+              disabled={readOnly}
+              className="input-base resize-y min-h-[80px]"
+            />
+          </div>
 
-        <div style={{ marginBottom: '30px' }}>
-          <label style={{ display: 'block', marginBottom: '8px' }}>Active Date (Optional)</label>
-          <input 
-            type="date" 
-            value={formData.activeDate} 
-            onChange={(e) => setFormData({...formData, activeDate: e.target.value})}
-            style={{ width: '100%', maxWidth: '300px' }}
-            disabled={readOnly}
-          />
-          {!readOnly && (
-              <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '5px' }}>
+          <div className="mb-8">
+            <label className="block text-sm font-medium text-text-secondary mb-2">Active Date (Optional)</label>
+            <input 
+              type="date" 
+              value={formData.activeDate} 
+              onChange={(e) => setFormData({...formData, activeDate: e.target.value})}
+              disabled={readOnly}
+              className="input-base max-w-xs"
+            />
+            {!readOnly && (
+              <p className="text-xs text-text-secondary mt-2">
                 Setting a date here plans the quiz but does not activate it. Use the 'Activate' button in the list to go live.
               </p>
-          )}
-        </div>
+            )}
+          </div>
 
-        <h3>Questions (10 Required)</h3>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', marginTop: '15px' }}>
-          {formData.questions.map((q, qIdx) => (
-            <div key={qIdx} style={{ padding: '20px', background: 'rgba(255,255,255,0.02)', borderRadius: '12px', border: '1px solid var(--glass-border)' }}>
-              <div style={{ display: 'flex', gap: '10px', marginBottom: '15px' }}>
-                <span style={{ paddingTop: '10px', fontWeight: 'bold' }}>Q{qIdx + 1}.</span>
-                <input 
-                  type="text" 
-                  value={q.questionText}
-                  onChange={(e) => handleQuestionChange(qIdx, 'questionText', e.target.value)}
-                  placeholder="Enter question text..."
-                  required
-                  style={{ flex: 1 }}
-                  disabled={readOnly}
-                />
-              </div>
+          <h3 className="text-xl font-bold mb-4">Questions (10 Required)</h3>
+          <div className="flex flex-col gap-6">
+            {formData.questions.map((q, qIdx) => (
+              <div key={qIdx} className="p-6 bg-white/[0.02] rounded-2xl border border-white/[0.08]">
+                <div className="flex gap-4 mb-4">
+                  <span className="pt-3 font-bold text-accent-primary">Q{qIdx + 1}.</span>
+                  <input 
+                    type="text" 
+                    value={q.questionText}
+                    onChange={(e) => handleQuestionChange(qIdx, 'questionText', e.target.value)}
+                    placeholder="Enter question text..."
+                    required
+                    disabled={readOnly}
+                    className="input-base flex-1"
+                  />
+                </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px', paddingLeft: '30px' }}>
-                {q.options.map((opt, oIdx) => (
-                  <div key={oIdx} style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                    <input 
-                      type="text"
-                      value={opt.text}
-                      onChange={(e) => handleOptionChange(qIdx, oIdx, 'text', e.target.value)}
-                      placeholder={`Option ${oIdx + 1}`}
-                      required
-                      disabled={readOnly}
-                    />
-                    <select 
-                      value={opt.type}
-                      onChange={(e) => handleOptionChange(qIdx, oIdx, 'type', e.target.value)}
-                      style={{ 
-                          padding: '5px', 
-                          borderRadius: '6px', 
-                          background: readOnly ? 'rgba(255,255,255,0.05)' : 'black', 
-                          color: 'white', 
-                          border: '1px solid var(--glass-border)',
-                          cursor: readOnly ? 'not-allowed' : 'pointer',
-                          opacity: readOnly ? 0.7 : 1
-                      }}
-                      disabled={readOnly}
-                    >  <option value="In-Charge">In-Charge</option>
-                      <option value="In-Control">In-Control</option>
-                    </select>
-                  </div>
-                ))}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pl-0 sm:pl-10">
+                  {q.options.map((opt, oIdx) => (
+                    <div key={oIdx} className="flex flex-col gap-2">
+                      <input 
+                        type="text"
+                        value={opt.text}
+                        onChange={(e) => handleOptionChange(qIdx, oIdx, 'text', e.target.value)}
+                        placeholder={`Option ${oIdx + 1}`}
+                        required
+                        disabled={readOnly}
+                        className="input-base text-sm"
+                      />
+                      <select 
+                        value={opt.type}
+                        onChange={(e) => handleOptionChange(qIdx, oIdx, 'type', e.target.value)}
+                        disabled={readOnly}
+                        className="input-base text-xs py-2 h-auto cursor-pointer focus:ring-1 focus:ring-accent-primary"
+                      >
+                        <option value="In-Charge" className="bg-bg-secondary">In-Charge</option>
+                        <option value="In-Control" className="bg-bg-secondary">In-Control</option>
+                      </select>
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
         </fieldset>
 
-        <div style={{ marginTop: '30px', display: 'flex', gap: '15px', justifyContent: 'flex-end' }}>
+        <div className="mt-8 flex gap-4 justify-end">
           <button 
             type="button" 
             onClick={onCancel}
-            style={{ padding: '10px 20px', borderRadius: '8px', background: 'transparent', border: '1px solid var(--text-secondary)', color: 'var(--text-secondary)', cursor: 'pointer' }}
+            className="px-6 py-2.5 rounded-xl border border-text-secondary/30 text-text-secondary hover:text-white hover:bg-white/5 transition-colors"
           >
             {readOnly ? 'Close' : 'Cancel'}
           </button>
           
           {!readOnly && (
-              <button 
-                type="submit" 
-                disabled={loading}
-                className="btn-primary"
-                style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
-              >
-                <Save size={18} />
-                {loading ? 'Saving...' : 'Save Quiz'}
-              </button>
+            <button 
+              type="submit" 
+              disabled={loading}
+              className="btn-primary"
+            >
+              <Save size={18} />
+              {loading ? 'Saving...' : 'Save Quiz'}
+            </button>
           )}
         </div>
       </form>

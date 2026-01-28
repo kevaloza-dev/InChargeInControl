@@ -98,32 +98,31 @@ const AdminDashboard = () => {
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
   return (
-    <div className="dashboard-container">
+    <div className="min-h-screen bg-bg-primary grid grid-cols-1 md:grid-cols-[250px_1fr] transition-all duration-300">
       {/* Mobile Header */}
-      <div className="mobile-header">
-         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <Menu onClick={toggleSidebar} style={{ cursor: 'pointer', color: 'var(--text-primary)' }} />
-            <h2 style={{ fontSize: '1.2rem', color: 'var(--accent-primary)', margin: 0 }}>Admin Panel</h2>
+      <div className="md:hidden p-5 bg-bg-secondary flex items-center justify-between border-b border-glass-border">
+         <div className="flex items-center gap-3">
+            <Menu onClick={toggleSidebar} className="cursor-pointer text-text-primary" />
+            <h2 className="text-xl text-accent-primary m-0">Admin Panel</h2>
          </div>
       </div>
 
       {/* Sidebar Overlay for Mobile */}
       {isSidebarOpen && (
         <div 
-          className="mobile-only"
-          style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 40 }}
+          className="md:hidden fixed inset-0 bg-black/50 z-40"
           onClick={() => setIsSidebarOpen(false)}
         />
       )}
 
       {/* Sidebar */}
-      <div className={`dashboard-sidebar ${isSidebarOpen ? 'open' : ''}`}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '40px' }}>
-          <h2 style={{ fontSize: '1.2rem', color: 'var(--accent-primary)' }}>In-Charge OR In-Control</h2>
-          <X className="mobile-only" onClick={() => setIsSidebarOpen(false)} style={{ cursor: 'pointer' }} />
+      <div className={`dashboard-sidebar ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'} bg-bg-secondary p-8 border-r border-glass-border h-screen fixed top-0 left-0 bottom-0 w-[250px] md:relative md:w-auto md:block z-50 transition-transform duration-300`}>
+        <div className="flex justify-between items-center mb-10">
+          <h2 className="text-xl text-accent-primary font-bold">In-Charge OR In-Control</h2>
+          <X className="md:hidden cursor-pointer text-text-primary" onClick={() => setIsSidebarOpen(false)} />
         </div>
         
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+        <div className="flex flex-col gap-3">
 
           <SidebarItem 
             icon={<BarChart2 size={20} />} 
@@ -148,7 +147,7 @@ const AdminDashboard = () => {
 
         </div>
         
-        <div style={{ marginTop: 'auto', paddingTop: '40px' }}>
+        <div className="mt-auto pt-10">
           <SidebarItem 
             icon={<LogOut size={20} />} 
             label="Logout" 
@@ -159,12 +158,12 @@ const AdminDashboard = () => {
       </div>
 
       {/* Main Content */}
-      <div className="dashboard-content">
+      <div className="p-5 md:p-10 overflow-y-auto h-[calc(100vh-80px)] md:h-screen">
         {activeTab === 'users' && (
           <div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px', flexWrap: 'wrap', gap: '15px' }}>
-            <h1>Users</h1>
-            <div style={{ display: 'flex', gap: '10px' }}>
+          <div className="flex flex-wrap justify-between items-center mb-8 gap-4">
+            <h1 className="text-3xl font-bold">Users</h1>
+            <div className="flex gap-3">
               <button onClick={() => setImportModalOpen(true)} className="btn-secondary">
                 <Upload size={18} /> Import Users
               </button>
@@ -173,32 +172,28 @@ const AdminDashboard = () => {
               </button>
             </div>
           </div>
-          <div className="glass-card" style={{ padding: '20px' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+          <div className="glass-card p-5 overflow-x-auto">
+              <table className="w-full text-left border-collapse">
                 <thead>
-                  <tr style={{ borderBottom: '1px solid var(--glass-border)', color: 'var(--text-secondary)' }}>
-                    <th style={{ padding: '15px' }}>Name</th>
-                    <th style={{ padding: '15px' }}>Email</th>
-                    <th style={{ padding: '15px' }}>Mobile</th>
-                    <th style={{ padding: '15px' }}>Company</th>
-                    <th style={{ padding: '15px' }}>Status</th>
+                  <tr className="border-b border-glass-border text-text-secondary">
+                    <th className="p-4 whitespace-nowrap">Name</th>
+                    <th className="p-4 whitespace-nowrap">Email</th>
+                    <th className="p-4 whitespace-nowrap">Mobile</th>
+                    <th className="p-4 whitespace-nowrap">Company</th>
+                    <th className="p-4 whitespace-nowrap">Status</th>
                   </tr>
                 </thead>
                 <tbody>
                   {users.map((u, i) => (
-                    <tr key={i} style={{ borderBottom: '1px solid var(--glass-border)' }}>
-                      <td style={{ padding: '15px' }}>{u.name}</td>
-                      <td style={{ padding: '15px' }}>{u.email}</td>
-                      <td style={{ padding: '15px' }}>{u.mobile}</td>
-                      <td style={{ padding: '15px' }}>{u.company || '-'}</td>
-                      <td style={{ padding: '15px' }}>
-                        <span style={{ 
-                          padding: '4px 10px', 
-                          borderRadius: '20px', 
-                          fontSize: '0.8rem',
-                          background: u.accessFlag ? 'rgba(34, 197, 94, 0.1)' : 'rgba(239, 68, 68, 0.1)',
-                          color: u.accessFlag ? 'var(--success)' : 'var(--error)'
-                        }}>
+                    <tr key={i} className="border-b border-glass-border hover:bg-white/5 transition-colors">
+                      <td className="p-4">{u.name}</td>
+                      <td className="p-4">{u.email}</td>
+                      <td className="p-4">{u.mobile}</td>
+                      <td className="p-4">{u.company || '-'}</td>
+                      <td className="p-4">
+                        <span className={`px-3 py-1 rounded-full text-xs ${
+                          u.accessFlag ? 'bg-green-500/10 text-success' : 'bg-red-500/10 text-error'
+                        }`}>
                           {u.accessFlag ? 'Active' : 'Disabled'}
                         </span>
                       </td>
@@ -212,45 +207,42 @@ const AdminDashboard = () => {
 
         {/* Import Modal */}
         {importModalOpen && (
-          <div style={{
-            position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', zIndex: 50,
-            display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px'
-          }}>
-            <div className="glass-card" style={{ maxWidth: '600px', width: '100%', padding: '30px', position: 'relative' }}>
+          <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-5">
+            <div className="glass-card w-full max-w-xl p-8 relative">
               <button 
                 onClick={() => setImportModalOpen(false)} 
-                style={{ position: 'absolute', top: '20px', right: '20px', background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer' }}
+                className="absolute top-5 right-5 text-text-secondary hover:text-white"
               >
                 <X size={24} />
               </button>
               
-              <h2 style={{ marginBottom: '20px' }}>Bulk User Import</h2>
-              <form onSubmit={handleImport} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                <p style={{ color: 'var(--text-secondary)' }}>Upload CSV or Excel file containing: Name, Email, Mobile, Company, AccessFlag</p>
+              <h2 className="text-2xl font-bold mb-5">Bulk User Import</h2>
+              <form onSubmit={handleImport} className="flex flex-col gap-5">
+                <p className="text-text-secondary">Upload CSV or Excel file containing: Name, Email, Mobile, Company, AccessFlag</p>
                 <input 
                   type="file" 
                   accept=".csv, .xlsx" 
                   onChange={(e) => setFile(e.target.files[0])} 
-                  style={{ background: 'transparent', padding: '0' }}
+                  className="bg-transparent p-0 border-none"
                 />
-                <button type="submit" className="btn-primary" disabled={loading || !file}>
+                <button type="submit" className="btn-primary justify-center" disabled={loading || !file}>
                   {loading ? 'Importing...' : 'Start Import'}
                 </button>
               </form>
 
               {importSummary && (
-                <div style={{ marginTop: '30px', padding: '20px', background: 'rgba(255, 255, 255, 0.05)', borderRadius: '12px' }}>
-                  <h3>Import Summary</h3>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', marginTop: '15px' }}>
-                    <p><span style={{ color: 'var(--success)' }}>Success:</span> {importSummary.success}</p>
-                    <p><span style={{ color: 'var(--accent-primary)' }}>Updated:</span> {importSummary.updated}</p>
-                    <p><span style={{ color: 'var(--text-secondary)' }}>Duplicates:</span> {importSummary.duplicates}</p>
-                    <p><span style={{ color: 'var(--error)' }}>Failure:</span> {importSummary.failure}</p>
+                <div className="mt-8 p-5 bg-white/5 rounded-xl">
+                  <h3 className="text-lg font-semibold mb-3">Import Summary</h3>
+                  <div className="flex flex-wrap gap-5">
+                    <p><span className="text-success font-bold">Success:</span> {importSummary.success}</p>
+                    <p><span className="text-accent-primary font-bold">Updated:</span> {importSummary.updated}</p>
+                    <p><span className="text-text-secondary font-bold">Duplicates:</span> {importSummary.duplicates}</p>
+                    <p><span className="text-error font-bold">Failure:</span> {importSummary.failure}</p>
                   </div>
                   {importSummary.details.length > 0 && (
-                    <div style={{ marginTop: '20px', maxHeight: '150px', overflowY: 'auto' }}>
+                    <div className="mt-5 max-h-40 overflow-y-auto space-y-1">
                       {importSummary.details.map((d, i) => (
-                        <p key={i} style={{ fontSize: '0.9rem', color: 'var(--error)', marginBottom: '5px' }}>
+                        <p key={i} className="text-sm text-error">
                           {d.email}: {d.error}
                         </p>
                       ))}
@@ -263,14 +255,13 @@ const AdminDashboard = () => {
         )}
 
         {activeTab === 'quiz' && (
-           <div style={{ maxWidth: '1000px' }}>
-             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
-               <h1>Quiz Management</h1>
+           <div className="max-w-[1000px]">
+             <div className="flex justify-between items-center mb-8">
+               <h1 className="text-3xl font-bold">Quiz Management</h1>
                {quizView === 'list' && (
                  <button 
                    onClick={handleCreateQuiz}
                    className="btn-primary" 
-                   style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
                  >
                    <Plus size={18} /> Create Quiz
                  </button>
@@ -297,7 +288,7 @@ const AdminDashboard = () => {
                  onCancel={() => setQuizView('list')} 
                />
              ) : (
-                <div style={{ position: 'relative' }}>
+                <div className="relative">
                     <QuizEditor 
                         quiz={selectedQuiz} 
                         onSave={() => setQuizView('list')} // Should not be called in readOnly but safe to have
@@ -318,20 +309,14 @@ const AdminDashboard = () => {
 const SidebarItem = ({ icon, label, active, onClick, danger }) => (
   <div 
     onClick={onClick}
-    style={{
-      display: 'flex',
-      alignItems: 'center',
-      gap: '12px',
-      padding: '12px 16px',
-      borderRadius: '12px',
-      cursor: 'pointer',
-      transition: 'background 0.2s',
-      background: active ? 'rgba(99, 102, 241, 0.1)' : 'transparent',
-      color: danger ? 'var(--error)' : (active ? 'var(--accent-primary)' : 'var(--text-secondary)')
-    }}
+    className={`
+      flex items-center gap-3 px-4 py-3 rounded-xl cursor-pointer transition-colors duration-200
+      ${active ? 'bg-accent-primary/10 text-accent-primary' : 'hover:bg-white/5 text-text-secondary'}
+      ${danger ? 'text-error hover:text-red-400 hover:bg-red-500/10' : ''}
+    `}
   >
     {icon}
-    <span style={{ fontWeight: 500 }}>{label}</span>
+    <span className="font-medium">{label}</span>
   </div>
 );
 

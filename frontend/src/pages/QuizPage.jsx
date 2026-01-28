@@ -89,68 +89,47 @@ const QuizPage = () => {
     }
   };
 
-  if (loading) return <div style={{ textAlign: 'center', paddingTop: '100px' }}>Loading Quiz...</div>;
-  if (error) return <div style={{ textAlign: 'center', paddingTop: '100px', color: 'var(--error)' }}>{error}</div>;
+  if (loading) return <div className="text-center pt-24 text-text-secondary">Loading Quiz...</div>;
+  if (error) return <div className="text-center pt-24 text-error">{error}</div>;
   if (completed) return (
-    <div style={{ height: '100vh', padding: '20px 40px', textAlign: 'center', display: 'flex', flexDirection: 'column', overflow: 'hidden', position: 'relative' }}>
-      <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-          <button onClick={handleLogout} className="btn-secondary" style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'transparent', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer' }}>
+    <div className="h-screen px-10 py-5 text-center flex flex-col overflow-hidden relative">
+      <div className="flex justify-end">
+          <button onClick={handleLogout} className="btn-secondary bg-transparent border-none text-text-secondary hover:text-white hover:bg-white/5">
             <LogOut size={18} /> Logout
           </button>
       </div>
       
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
-        <h1 style={{ fontSize: '3.5rem', marginBottom: '10px' }}>Result: {result.result}</h1>
-        <p style={{ color: 'var(--text-secondary)', marginBottom: '20px' }}>Thank you for participating!</p>
+      <div className="flex-1 flex flex-col justify-center items-center">
+        <h1 className="text-6xl font-bold mb-4">Result: {result.result}</h1>
+        <p className="text-text-secondary mb-8">Thank you for participating!</p>
         
         <button 
           onClick={() => setShowDetails(!showDetails)}
-          className="btn-primary"
-          style={{ marginBottom: '30px', padding: '10px 20px', fontSize: '0.9rem' }}
+          className="btn-primary mb-8 text-sm"
         >
           {showDetails ? 'Hide Details' : 'See Detailed Results'}
         </button>
 
         {showDetails ? (
-          <div className="glass-card" style={{ 
-            width: '100%', 
-            maxWidth: '800px', 
-            maxHeight: '50vh', 
-            overflowY: 'auto', 
-            textAlign: 'left', 
-            padding: '20px',
-            marginBottom: '20px'
-          }}>
+          <div className="glass-card w-full max-w-3xl max-h-[50vh] overflow-y-auto text-left p-0 mb-5">
             {quiz.questions.map((q, idx) => {
               const response = responses.find(r => r.questionId === q._id);
               // Find the option text that was selected
               const selectedOption = q.options.find(opt => opt.type === response?.answerType);
               return (
-                <div key={idx} style={{ 
-                  padding: '15px', 
-                  borderBottom: '1px solid var(--glass-border)',
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  gap: '20px'
-                }}>
-                  <div style={{ flex: 1 }}>
-                    <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '5px' }}>Question {idx + 1}</p>
-                    <p style={{ fontWeight: 500 }}>{q.questionText}</p>
-                    <p style={{ fontSize: '0.85rem', marginTop: '5px', color: 'var(--accent-primary)' }}>
+                <div key={idx} className="p-5 border-b border-glass-border flex justify-between items-center gap-5 hover:bg-white/[0.02]">
+                  <div className="flex-1">
+                    <p className="text-sm text-text-secondary mb-1">Question {idx + 1}</p>
+                    <p className="font-medium">{q.questionText}</p>
+                    <p className="text-sm mt-1 text-accent-primary">
                       Selected: "{selectedOption?.text}"
                     </p>
                   </div>
-                  <div style={{ 
-                    padding: '4px 12px', 
-                    borderRadius: '20px', 
-                    fontSize: '0.8rem',
-                    fontWeight: 600,
-                    background: response?.answerType === 'In-Charge' ? 'rgba(99, 102, 241, 0.2)' : 'rgba(255, 255, 255, 0.1)',
-                    color: response?.answerType === 'In-Charge' ? 'var(--accent-primary)' : 'var(--text-secondary)',
-                    minWidth: '100px',
-                    textAlign: 'center'
-                  }}>
+                  <div className={`px-4 py-1.5 rounded-full text-xs font-semibold text-center min-w-[100px] 
+                    ${response?.answerType === 'In-Charge' 
+                      ? 'bg-indigo-500/20 text-indigo-400' 
+                      : 'bg-white/10 text-text-secondary'
+                    }`}>
                     {response?.answerType}
                   </div>
                 </div>
@@ -158,7 +137,7 @@ const QuizPage = () => {
             })}
           </div>
         ) : (
-          <div style={{ height: '60%', width: '100%', display: 'flex', justifyContent: 'center' }}>
+          <div className="h-[60%] w-full flex justify-center">
             <Ladder currentStep={currentStep} />
           </div>
         )}
@@ -169,52 +148,53 @@ const QuizPage = () => {
   const currentQuestion = quiz.questions[currentQuestionIndex];
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-      <header style={{ padding: '20px 40px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--glass-border)' }}>
-        <h2 style={{ fontSize: '1.2rem', color: 'var(--accent-primary)' }}>In-Charge OR In-Control</h2>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-          <span style={{ color: 'var(--text-secondary)' }}>Welcome, {user?.name}</span>
-          <button onClick={handleLogout} style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'transparent', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer' }}>
-            <LogOut size={18} /> Logout
+    <div className="min-h-screen flex flex-col bg-bg-primary">
+      <header className="px-10 py-5 flex justify-between items-center border-b border-glass-border bg-bg-secondary/50 backdrop-blur-md sticky top-0 z-40">
+        <h2 className="text-xl font-bold text-accent-primary">In-Charge OR In-Control</h2>
+        <div className="flex items-center gap-5">
+          <span className="text-text-secondary hidden sm:inline">Welcome, {user?.name}</span>
+          <button onClick={handleLogout} className="flex items-center gap-2 text-text-secondary hover:text-white transition-colors">
+            <LogOut size={18} /> <span className="hidden sm:inline">Logout</span>
           </button>
         </div>
       </header>
       
-      <div className="quiz-container">
-      <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={currentQuestionIndex}
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            className="glass-card"
-            style={{ padding: '40px' }}
-          >
-            <p style={{ color: 'var(--accent-primary)', marginBottom: '10px' }}>
-              Question {currentQuestionIndex + 1} of {quiz.questions.length}
-            </p>
-            <h2 style={{ fontSize: '2rem', marginBottom: '40px' }}>{currentQuestion.questionText}</h2>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-              {currentQuestion.options.map((option, idx) => (
-                <button
-                  key={idx}
-                  className="btn-primary"
-                  style={{ textAlign: 'left', background: 'var(--bg-secondary)', border: '1px solid var(--glass-border)' }}
-                  onClick={() => handleAnswer(option.type)}
-                >
-                  {option.text}
-                </button>
-              ))}
-            </div>
-          </motion.div>
-        </AnimatePresence>
-      </div>
+      <div className="flex-1 p-5 md:p-10 grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-8 max-w-7xl mx-auto w-full items-center">
+        <div className="flex flex-col justify-center max-w-2xl mx-auto w-full">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={currentQuestionIndex}
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              className="glass-card p-8 md:p-12 relative overflow-hidden"
+            >
+              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-accent-primary to-accent-secondary" />
+              <p className="text-accent-primary font-bold mb-4 tracking-wider text-sm uppercase">
+                Question {currentQuestionIndex + 1} of {quiz.questions.length}
+              </p>
+              <h2 className="text-2xl md:text-3xl font-bold mb-10 leading-tight">{currentQuestion.questionText}</h2>
+              <div className="flex flex-col gap-4">
+                {currentQuestion.options.map((option, idx) => (
+                  <button
+                    key={idx}
+                    className="group p-5 rounded-xl border border-glass-border bg-bg-secondary/50 text-left hover:border-accent-primary/50 hover:bg-accent-primary/5 transition-all duration-200 active:scale-[0.99]"
+                    onClick={() => handleAnswer(option.type)}
+                  >
+                    <span className="font-medium text-lg text-text-primary group-hover:text-white transition-colors">{option.text}</span>
+                  </button>
+                ))}
+              </div>
+            </motion.div>
+          </AnimatePresence>
+        </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-        <h3>Your Progress</h3>
-        <Ladder currentStep={currentStep} />
-      </div>
+        <div className="hidden lg:flex flex-col items-center bg-bg-secondary/30 rounded-3xl p-8 border border-glass-border h-[600px]">
+          <h3 className="text-lg font-bold mb-8 text-text-secondary">Your Progress</h3>
+          <div className="flex-1 w-full flex justify-center">
+            <Ladder currentStep={currentStep} />
+          </div>
+        </div>
       </div>
     </div>
   );

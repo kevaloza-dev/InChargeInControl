@@ -5,61 +5,25 @@ const Ladder = ({ currentStep }) => {
   const steps = Array.from({ length: 10 }, (_, i) => i + 1);
 
   return (
-    <div className="ladder-container">
+    <div className="h-full flex flex-col-reverse justify-between py-5 relative w-[250px] mx-auto">
       {steps.map((step) => (
         <div 
           key={step} 
-          className={`ladder-step ${step === currentStep ? 'active' : ''}`}
+          className={`w-full h-2 rounded-full transition-colors duration-300 relative ${step === currentStep ? 'bg-accent-primary shadow-[0_0_20px_theme(colors.accent-primary)]' : 'bg-white/10'}`}
         >
           {step === currentStep && (
             <motion.div
               layoutId="avatar"
-              className="avatar"
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-              style={{
-                position: 'absolute',
-                top: '-30px',
-                left: '50%',
-                transform: 'translateX(-50%)',
-                width: '40px',
-                height: '40px',
-                background: 'white',
-                borderRadius: '50%',
-                border: '4px solid var(--accent-primary)',
-                zIndex: 10,
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center'
-              }}
+              className="absolute -top-[30px] left-1/2 -translate-x-1/2 w-10 h-10 bg-white rounded-full border-4 border-accent-primary z-10 flex items-center justify-center text-lg"
             >
                👤
             </motion.div>
           )}
         </div>
       ))}
-      <style>{`
-        .ladder-container {
-          height: 100%;
-          display: flex;
-          flex-direction: column-reverse;
-          justify-content: space-between;
-          padding: 20px 0;
-          position: relative;
-        }
-        .ladder-step {
-          width: 250px;
-          height: 8px;
-          background: rgba(255, 255, 255, 0.1);
-          border-radius: 4px;
-          transition: background 0.3s;
-        }
-        .ladder-step.active {
-          background: var(--accent-primary);
-          box-shadow: 0 0 20px var(--accent-primary);
-        }
-      `}</style>
     </div>
   );
 };

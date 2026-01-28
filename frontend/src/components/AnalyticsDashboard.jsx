@@ -35,41 +35,33 @@ const AnalyticsDashboard = () => {
     fetchAnalytics();
   }, [filter]);
 
-  if (loading && !data) return <div style={{ color: 'var(--text-secondary)', padding: '20px' }}>Loading analytics...</div>;
-  if (error) return <div style={{ color: 'var(--error)', padding: '20px' }}>{error}</div>;
+  if (loading && !data) return <div className="p-5 text-text-secondary">Loading analytics...</div>;
+  if (error) return <div className="p-5 text-error">{error}</div>;
 
   return (
-    <div className="analytics-container" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+    <div className="flex flex-col gap-6">
       
       {/* Header & Filters */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '15px' }}>
-        <h2 style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>Analytics Dashboard</h2>
+      <div className="flex flex-wrap justify-between items-center gap-4">
+        <h2 className="text-2xl font-bold">Analytics Dashboard</h2>
         
-        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-          <div className="glass-card" style={{ padding: '8px 15px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <Filter size={16} />
+        <div className="flex items-center gap-3">
+          <div className="glass-card px-4 py-2 flex items-center gap-3">
+            <Filter size={16} className="text-text-secondary" />
             <select 
               value={filter} 
               onChange={(e) => setFilter(e.target.value)}
-              style={{ 
-                background: 'transparent', 
-                border: 'none', 
-                color: 'var(--text-primary)', 
-                outline: 'none', 
-                cursor: 'pointer',
-                minWidth: '120px'
-              }}
+              className="bg-transparent border-none text-text-primary outline-none cursor-pointer min-w-[120px] text-sm font-medium"
             >
-              <option value="all" style={{ background: '#1e293b', color: 'var(--text-primary)' }}>All Users</option>
-              <option value="incharge" style={{ background: '#1e293b', color: 'var(--text-primary)' }}>In-Charge Only</option>
-              <option value="incontrol" style={{ background: '#1e293b', color: 'var(--text-primary)' }}>In-Control Only</option>
+              <option value="all" className="bg-bg-secondary">All Users</option>
+              <option value="incharge" className="bg-bg-secondary">In-Charge Only</option>
+              <option value="incontrol" className="bg-bg-secondary">In-Control Only</option>
             </select>
           </div>
           
           <button 
             onClick={fetchAnalytics} 
-            className="btn-primary" 
-            style={{ padding: '8px 12px', display: 'flex', alignItems: 'center', gap: '5px' }}
+            className="btn-primary px-3 py-2 text-sm" 
           >
             <RefreshCw size={16} /> Refresh
           </button>
@@ -77,11 +69,7 @@ const AnalyticsDashboard = () => {
       </div>
 
       {/* Stats Row */}
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', 
-        gap: '20px' 
-      }}>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
         <StatCard 
           title="Total Users" 
           value={data.stats.totalUsers} 
@@ -106,15 +94,12 @@ const AnalyticsDashboard = () => {
       </div>
 
       {/* Charts Row 1 */}
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', 
-        gap: '20px' 
-      }}>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
         {/* User Growth */}
-        <div className="glass-card" style={{ padding: '20px', minHeight: '300px' }}>
-          <h3 style={{ marginBottom: '20px' }}>User Growth (30 Days)</h3>
-          <ResponsiveContainer width="100%" height={250}>
+        <div className="glass-card p-6 min-h-[350px] flex flex-col">
+          <h3 className="text-lg font-bold mb-6">User Growth (30 Days)</h3>
+          <div className="flex-1 w-full h-[250px]">
+          <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={data.userGrowth}>
               <defs>
                 <linearGradient id="colorCount" x1="0" y1="0" x2="0" y2="1">
@@ -122,21 +107,23 @@ const AnalyticsDashboard = () => {
                   <stop offset="95%" stopColor="#6366f1" stopOpacity={0}/>
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="var(--glass-border)" />
-              <XAxis dataKey="date" stroke="var(--text-secondary)" tick={{fontSize: 12}} />
-              <YAxis stroke="var(--text-secondary)" tick={{fontSize: 12}} />
+              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.08)" />
+              <XAxis dataKey="date" stroke="#94a3b8" tick={{fontSize: 12}} />
+              <YAxis stroke="#94a3b8" tick={{fontSize: 12}} />
               <Tooltip 
-                contentStyle={{ backgroundColor: 'var(--bg-secondary)', border: '1px solid var(--glass-border)', color: 'var(--text-primary)' }} 
+                contentStyle={{ backgroundColor: '#141417', border: '1px solid rgba(255,255,255,0.1)', color: '#f8fafc', borderRadius: '8px' }} 
               />
               <Area type="monotone" dataKey="count" stroke="#6366f1" fillOpacity={1} fill="url(#colorCount)" />
             </AreaChart>
           </ResponsiveContainer>
+          </div>
         </div>
 
         {/* Role Distribution */}
-        <div className="glass-card" style={{ padding: '20px', minHeight: '300px' }}>
-          <h3 style={{ marginBottom: '20px' }}>Role Distribution</h3>
-          <ResponsiveContainer width="100%" height={250}>
+        <div className="glass-card p-6 min-h-[350px] flex flex-col">
+          <h3 className="text-lg font-bold mb-6">Role Distribution</h3>
+          <div className="flex-1 w-full h-[250px]">
+          <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie
                 data={data.roleDistribution}
@@ -151,90 +138,92 @@ const AnalyticsDashboard = () => {
                   <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                 ))}
               </Pie>
-              <Tooltip contentStyle={{ backgroundColor: 'var(--bg-secondary)', border: '1px solid var(--glass-border)' }} />
+              <Tooltip contentStyle={{ backgroundColor: '#141417', border: '1px solid rgba(255,255,255,0.1)', color: '#f8fafc', borderRadius: '8px' }} />
               <Legend />
             </PieChart>
           </ResponsiveContainer>
+          </div>
         </div>
       </div>
 
       {/* Charts Row 2 */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '20px' }}>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
         {/* Accuracy Comparison */}
-        <div className="glass-card" style={{ padding: '20px', minHeight: '300px' }}>
-          <h3 style={{ marginBottom: '20px' }}>Accuracy Comparison</h3>
-          <ResponsiveContainer width="100%" height={250}>
+        <div className="glass-card p-6 min-h-[350px] flex flex-col">
+          <h3 className="text-lg font-bold mb-6">Accuracy Comparison</h3>
+          <div className="flex-1 w-full h-[250px]">
+          <ResponsiveContainer width="100%" height="100%">
             <BarChart data={data.accuracyData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="var(--glass-border)" />
-              <XAxis dataKey="name" stroke="var(--text-secondary)" />
-              <YAxis stroke="var(--text-secondary)" />
-              <Tooltip contentStyle={{ backgroundColor: 'var(--bg-secondary)', border: '1px solid var(--glass-border)' }} />
+              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.08)" />
+              <XAxis dataKey="name" stroke="#94a3b8" />
+              <YAxis stroke="#94a3b8" />
+              <Tooltip contentStyle={{ backgroundColor: '#141417', border: '1px solid rgba(255,255,255,0.1)', color: '#f8fafc', borderRadius: '8px' }} />
               <Legend />
               <Bar dataKey="InCharge" fill="#6366f1" radius={[4, 4, 0, 0]} />
               <Bar dataKey="InControl" fill="#a855f7" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
+          </div>
         </div>
 
         {/* Top Users */}
-        <div className="glass-card" style={{ padding: '20px', minHeight: '300px' }}>
-          <h3 style={{ marginBottom: '20px' }}>Top 5 Performers</h3>
-          <ResponsiveContainer width="100%" height={250}>
+        <div className="glass-card p-6 min-h-[350px] flex flex-col">
+          <h3 className="text-lg font-bold mb-6">Top 5 Performers</h3>
+          <div className="flex-1 w-full h-[250px]">
+          <ResponsiveContainer width="100%" height="100%">
             <BarChart data={data.topUsers} layout="vertical">
-              <CartesianGrid strokeDasharray="3 3" stroke="var(--glass-border)" horizontal={false} />
-              <XAxis type="number" stroke="var(--text-secondary)" />
-              <YAxis dataKey="name" type="category" width={100} stroke="var(--text-secondary)" tick={{fontSize: 12}} />
-              <Tooltip contentStyle={{ backgroundColor: 'var(--bg-secondary)', border: '1px solid var(--glass-border)' }} />
+              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.08)" horizontal={false} />
+              <XAxis type="number" stroke="#94a3b8" />
+              <YAxis dataKey="name" type="category" width={100} stroke="#94a3b8" tick={{fontSize: 12}} />
+              <Tooltip contentStyle={{ backgroundColor: '#141417', border: '1px solid rgba(255,255,255,0.1)', color: '#f8fafc', borderRadius: '8px' }} />
               <Bar dataKey="score" fill="#22c55e" radius={[0, 4, 4, 0]} />
             </BarChart>
           </ResponsiveContainer>
+          </div>
         </div>
       </div>
 
       {/* Data Table */}
-      <div className="glass-card" style={{ padding: '20px', overflowX: 'auto' }}>
-        <h3 style={{ marginBottom: '20px' }}>User Performance</h3>
-        <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '600px' }}>
-          <thead>
-            <tr style={{ background: 'rgba(255,255,255,0.05)', textAlign: 'left' }}>
-              <th style={{ padding: '12px' }}>Name</th>
-              <th style={{ padding: '12px' }}>Email</th>
-              <th style={{ padding: '12px' }}>Score (Charge/Control)</th>
-              <th style={{ padding: '12px' }}>Result</th>
-              <th style={{ padding: '12px' }}>Accuracy</th>
-              <th style={{ padding: '12px' }}>Last Quiz</th>
-            </tr>
-          </thead>
-          <tbody>
-            {data.usersTable.map((user) => (
-              <tr key={user.id} style={{ borderBottom: '1px solid var(--glass-border)' }}>
-                <td style={{ padding: '12px' }}>{user.name}</td>
-                <td style={{ padding: '12px', color: 'var(--text-secondary)' }}>{user.email}</td>
-                <td style={{ padding: '12px' }}>{user.score}</td>
-                <td style={{ padding: '12px' }}>
-                  <span style={{ 
-                    padding: '4px 8px', 
-                    borderRadius: '4px', 
-                    fontSize: '0.8rem',
-                    background: user.result === 'In-Charge' ? 'rgba(99, 102, 241, 0.2)' : 
-                               user.result === 'In-Control' ? 'rgba(168, 85, 247, 0.2)' : 
-                               'rgba(148, 163, 184, 0.2)',
-                    color: user.result === 'In-Charge' ? '#818cf8' : 
-                           user.result === 'In-Control' ? '#c084fc' : 
-                           '#cbd5e1'
-                  }}>
-                    {user.result || 'N/A'}
-                  </span>
-                </td>
-                <td style={{ padding: '12px' }}>{user.accuracy}</td>
-                <td style={{ padding: '12px', color: 'var(--text-secondary)' }}>
-                  {user.lastQuizDate !== '-' ? new Date(user.lastQuizDate).toLocaleDateString() : '-'}
-                </td>
+      <div className="glass-card p-0 overflow-hidden">
+        <div className="p-6 border-b border-white/[0.08]">
+          <h3 className="text-lg font-bold">User Performance</h3>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse min-w-[700px]">
+            <thead>
+              <tr className="bg-white/[0.02] text-text-secondary border-b border-white/[0.08]">
+                <th className="p-4 font-semibold">Name</th>
+                <th className="p-4 font-semibold">Email</th>
+                <th className="p-4 font-semibold">Score (Charge/Control)</th>
+                <th className="p-4 font-semibold">Result</th>
+                <th className="p-4 font-semibold">Accuracy</th>
+                <th className="p-4 font-semibold">Last Quiz</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-        {/* Pagination placeholder if needed, current version shows all */}
+            </thead>
+            <tbody>
+              {data.usersTable.map((user) => (
+                <tr key={user.id} className="border-b border-white/[0.05] hover:bg-white/[0.02] transition-colors">
+                  <td className="p-4 font-medium">{user.name}</td>
+                  <td className="p-4 text-text-secondary">{user.email}</td>
+                  <td className="p-4">{user.score}</td>
+                  <td className="p-4">
+                    <span className={`px-2.5 py-1 rounded text-xs font-semibold ${
+                      user.result === 'In-Charge' ? 'bg-indigo-500/20 text-indigo-400' : 
+                      user.result === 'In-Control' ? 'bg-purple-500/20 text-purple-400' : 
+                      'bg-slate-500/20 text-slate-400'
+                    }`}>
+                      {user.result || 'N/A'}
+                    </span>
+                  </td>
+                  <td className="p-4">{user.accuracy}</td>
+                  <td className="p-4 text-text-secondary">
+                    {user.lastQuizDate !== '-' ? new Date(user.lastQuizDate).toLocaleDateString() : '-'}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
 
     </div>
@@ -242,14 +231,14 @@ const AnalyticsDashboard = () => {
 };
 
 const StatCard = ({ title, value, icon, subtext }) => (
-  <div className="glass-card" style={{ padding: '20px', display: 'flex', alignItems: 'center', gap: '15px' }}>
-    <div style={{ background: 'rgba(255,255,255,0.05)', padding: '12px', borderRadius: '12px' }}>
+  <div className="glass-card p-6 flex items-center gap-4">
+    <div className="bg-white/5 p-3 rounded-2xl flex items-center justify-center h-12 w-12">
       {icon}
     </div>
     <div>
-      <div style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>{title}</div>
-      <div style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>{value}</div>
-      {subtext && <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>{subtext}</div>}
+      <div className="text-text-secondary text-sm font-medium">{title}</div>
+      <div className="text-2xl font-bold mt-1 text-white">{value}</div>
+      {subtext && <div className="text-xs text-text-secondary mt-0.5">{subtext}</div>}
     </div>
   </div>
 );

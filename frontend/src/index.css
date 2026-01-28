@@ -1,269 +1,47 @@
-:root {
-  --bg-primary: #0a0a0c;
-  --bg-secondary: #141417;
-  --accent-primary: #6366f1;
-  /* Indigo */
-  --accent-secondary: #a855f7;
-  /* Purple */
-  --text-primary: #f8fafc;
-  --text-secondary: #94a3b8;
-  --glass-bg: rgba(255, 255, 255, 0.03);
-  --glass-border: rgba(255, 255, 255, 0.08);
-  --success: #22c55e;
-  --error: #ef4444;
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-  /* Spacing Variables */
-  --container-padding: 2rem;
-  --header-height: 80px;
+@layer base {
+  body {
+    @apply bg-bg-primary text-text-primary min-h-screen overflow-x-hidden;
+  }
 }
 
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
-}
+@layer components {
+  .glass-card {
+    @apply bg-white/[0.03] backdrop-blur-xl border border-white/[0.08] rounded-[20px] shadow-lg transition-all duration-300;
+  }
 
-body {
-  background-color: var(--bg-primary);
-  color: var(--text-primary);
-  min-height: 100vh;
-  overflow-x: hidden;
-}
+  .btn-primary {
+    @apply bg-gradient-to-br from-accent-primary to-accent-secondary text-white border-0 px-6 py-3 rounded-xl font-semibold cursor-pointer transition-transform duration-200 inline-flex items-center justify-center gap-2 hover:-translate-y-0.5 hover:opacity-90 active:translate-y-0;
+  }
 
-.glass-card {
-  background: var(--glass-bg);
-  backdrop-filter: blur(12px);
-  border: 1px solid var(--glass-border);
-  border-radius: 20px;
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-  transition: all 0.3s ease;
-}
+  .btn-secondary {
+    @apply flex items-center gap-2 px-5 py-2.5 rounded-xl border border-white/[0.08] bg-white/[0.03] text-white cursor-pointer transition-all duration-200 hover:bg-white/[0.05];
+  }
 
-.btn-primary {
-  background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
-  color: white;
-  border: none;
-  padding: 12px 24px;
-  border-radius: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: transform 0.2s, opacity 0.2s;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-}
-
-.btn-primary:hover {
-  transform: translateY(-2px);
-  opacity: 0.9;
-}
-
-.btn-primary:active {
-  transform: translateY(0);
-}
-
-.btn-secondary {
-  /* Added globally as it was inline in some components */
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 20px;
-  border-radius: 12px;
-  border: 1px solid var(--glass-border);
-  background: var(--glass-bg);
-  color: white;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.btn-secondary:hover {
-  background: rgba(255, 255, 255, 0.05);
+  .input-base {
+    @apply bg-bg-secondary border border-white/[0.08] text-white px-4 py-3 rounded-xl outline-none transition-colors duration-200 w-full focus:border-accent-primary disabled:opacity-70 disabled:cursor-not-allowed disabled:bg-white/[0.05] disabled:border-transparent;
+  }
 }
 
 input,
 textarea,
 select {
-  background: var(--bg-secondary);
-  border: 1px solid var(--glass-border);
-  color: white;
-  padding: 12px 16px;
-  border-radius: 12px;
-  outline: none;
-  transition: border-color 0.2s;
-  width: 100%;
-  /* Default to full width for responsiveness */
-}
-
-input:focus,
-textarea:focus,
-select:focus {
-  border-color: var(--accent-primary);
-}
-
-input:disabled,
-textarea:disabled,
-select:disabled {
-  opacity: 0.7;
-  cursor: not-allowed;
-  background: rgba(255, 255, 255, 0.05);
-  /* Slightly lighter/different to indicate disabled */
-  border-color: transparent;
-}
-
-.ladder-container {
-  display: flex;
-  flex-direction: column-reverse;
-  align-items: center;
-  gap: 8px;
-  padding: 20px;
-}
-
-/* Responsive Layouts */
-.dashboard-container {
-  display: grid;
-  grid-template-columns: 250px 1fr;
-  min-height: 100vh;
-  background: var(--bg-primary);
-  transition: all 0.3s ease;
+  @apply input-base;
 }
 
 .dashboard-sidebar {
-  background: var(--bg-secondary);
-  padding: 30px;
-  border-right: 1px solid var(--glass-border);
-  height: 100vh;
-  position: sticky;
-  top: 0;
-  transition: transform 0.3s ease;
-  z-index: 50;
+  @apply bg-bg-secondary p-8 border-r border-white/[0.08] h-screen sticky top-0 transition-transform duration-300 z-50;
 }
 
-.dashboard-content {
-  padding: 40px;
-  overflow-y: auto;
-  height: 100vh;
+.dashboard-sidebar.open {
+  transform: translateX(0);
 }
 
-.quiz-container {
-  display: grid;
-  grid-template-columns: 1fr 300px;
-  flex: 1;
-  padding: 40px;
-  gap: 40px;
-}
-
-.mobile-header {
-  display: none;
-  padding: 20px;
-  background: var(--bg-secondary);
-  align-items: center;
-  justify-content: space-between;
-  border-bottom: 1px solid var(--glass-border);
-}
-
-/* Responsive Overrides */
 @media (max-width: 768px) {
-  .dashboard-container {
-    grid-template-columns: 1fr;
-    display: flex;
-    flex-direction: column;
-  }
-
   .dashboard-sidebar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    width: 250px;
-    transform: translateX(-100%);
-  }
-
-  .dashboard-sidebar.open {
-    transform: translateX(0);
-  }
-
-  .dashboard-content {
-    padding: 20px;
-    height: auto;
-    overflow-y: visible;
-  }
-
-  .quiz-container {
-    grid-template-columns: 1fr;
-    display: flex;
-    flex-direction: column;
-    padding: 20px;
-    gap: 30px;
-  }
-
-  .mobile-header {
-    display: flex;
-  }
-
-  /* Table Responsiveness */
-  table {
-    display: block;
-    overflow-x: auto;
-    white-space: nowrap;
-  }
-}
-
-.ladder-step {
-  width: 200px;
-  height: 12px;
-  background: var(--glass-border);
-  border-radius: 6px;
-  position: relative;
-  transition: width 0.3s;
-}
-
-.ladder-step.active {
-  background: var(--accent-primary);
-  box-shadow: 0 0 15px var(--accent-primary);
-}
-
-/* Utilities */
-.mobile-only {
-  display: none !important;
-}
-
-.desktop-only {
-  display: block !important;
-}
-
-/* Responsive Breakpoints */
-@media (max-width: 768px) {
-  :root {
-    --container-padding: 1rem;
-    --header-height: 60px;
-  }
-
-  .mobile-only {
-    display: block !important;
-  }
-
-  .desktop-only {
-    display: none !important;
-  }
-
-  h1 {
-    font-size: 1.8rem;
-  }
-
-  h2 {
-    font-size: 1.5rem;
-  }
-
-  .glass-card {
-    border-radius: 16px;
-    padding: 20px !important;
-    /* Force override inline styles if needed, though class-based is better */
-  }
-
-  .ladder-step {
-    width: 60vw;
-    /* Make ladder responsive */
+    @apply fixed top-0 left-0 bottom-0 w-[250px] -translate-x-full;
   }
 }
