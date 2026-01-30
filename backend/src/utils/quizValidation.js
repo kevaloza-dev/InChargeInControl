@@ -61,11 +61,13 @@ const validateQuizStructure = (quizData, enforceContent = false) => {
 
   // If multi-language content is provided
   if (content && languages) {
+    const isMap = content instanceof Map;
     for (const lang of languages) {
-      if (!content[lang]) {
+      const langContent = isMap ? content.get(lang) : content[lang];
+      if (!langContent) {
         return { isValid: false, error: `Content for language '${lang}' is missing.` };
       }
-      const res = validateQuestions(content[lang].questions, lang, content[lang].title);
+      const res = validateQuestions(langContent.questions, lang, langContent.title);
       if (!res.isValid) return res;
     }
     return { isValid: true, error: null };

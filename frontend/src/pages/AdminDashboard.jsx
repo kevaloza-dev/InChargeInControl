@@ -111,7 +111,7 @@ const AdminDashboard = () => {
       {/* Sidebar */}
       <div className={`dashboard-sidebar ${isSidebarOpen ? 'open' : ''} h-screen fixed top-0 left-0 bottom-0 w-[250px] md:sticky md:block z-50 transition-transform duration-300 flex-shrink-0`}>
         <div className="flex justify-between items-center mb-10">
-          <h2 className="text-xl text-accent-primary font-bold">In-Charge OR In-Control</h2>
+          <h2 className="text-xl text-orange-500 font-bold">In-Charge OR In-Control</h2>
           <X className="md:hidden cursor-pointer text-text-primary" onClick={() => setIsSidebarOpen(false)} />
         </div>
         

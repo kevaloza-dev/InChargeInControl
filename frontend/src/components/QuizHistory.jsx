@@ -13,7 +13,7 @@ const QuizHistory = ({ history, onSelectQuiz }) => {
 
   return (
     <div className="w-full">
-      <h3 className="text-xl font-bold mb-6 text-accent-primary uppercase tracking-widest">Quiz History</h3>
+      <h3 className="text-xl font-bold mb-6 text-orange-500 uppercase tracking-widest">Quiz History</h3>
       <div className="flex flex-col md:flex-row md:overflow-x-auto pb-6 gap-6 md:scrollbar-hide snap-y md:snap-x">
         {history.map((item, idx) => (
             <motion.div
@@ -31,14 +31,14 @@ const QuizHistory = ({ history, onSelectQuiz }) => {
                             {new Date(item.date).toLocaleDateString()}
                         </div>
                         {item.language && (
-                            <div className="text-[10px] text-accent-primary uppercase tracking-tighter font-bold">
+                            <div className="text-[10px] text-orange-500 uppercase tracking-tighter font-bold">
                                 Language: {item.language}
                             </div>
                         )}
                     </div>
                     <div className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-tighter
-                        ${item.result === 'In-Charge' ? 'bg-indigo-500/20 text-indigo-400' : 
-                          item.result === 'In-Control' ? 'bg-emerald-500/20 text-emerald-400' : 
+                        ${item.result === 'In-Charge' ? 'bg-blue-500/20 text-blue-400' : 
+                          item.result === 'In-Control' ? 'bg-orange-500/20 text-orange-400' : 
                           'bg-white/10 text-text-secondary'}
                     `}>
                         {item.result}
@@ -51,7 +51,7 @@ const QuizHistory = ({ history, onSelectQuiz }) => {
                 
                 <div className="flex justify-between items-center mt-2">
                     <span className="text-xs text-text-secondary uppercase font-bold tracking-widest">View Details</span>
-                    <ChevronRight size={18} className="text-accent-primary group-hover:translate-x-1 transition-transform" />
+                    <ChevronRight size={18} className="text-orange-500 group-hover:translate-x-1 transition-transform" />
                 </div>
             </motion.div>
         ))}

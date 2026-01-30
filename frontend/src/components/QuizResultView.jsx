@@ -1,26 +1,30 @@
 import React from 'react';
-import Ladder from './Ladder';
+import Speedometer from './Speedometer';
 import { motion } from 'framer-motion';
 
-const QuizResultView = ({ result, responses, quizData, selectedLang, showDetails, setShowDetails, currentStep, hideToggle = false }) => {
-  const questions = quizData.content?.[selectedLang]?.questions || quizData.questions || [];
+const QuizResultView = ({ result, responses, quizData, selectedLang, showDetails, setShowDetails, currentStep, totalSteps, hideToggle = false }) => {
+  const langKey = selectedLang?.toLowerCase();
+  const questions = quizData.content?.[langKey]?.questions || quizData.questions || [];
 
   return (
     <div className="flex-1 flex flex-col justify-center items-center w-full">
-      <h1 className="text-6xl font-bold mb-4">Result: {result.result}</h1>
-      <p className="text-text-secondary mb-8">Thank you for participating!</p>
+      <h1 className="text-4xl font-bold mb-2">Result: {result.result}</h1>
+      <p className="text-text-secondary mb-4">Thank you for participating!</p>
       
+      {/* Toggle button - positioned right after thank you text */}
       {!hideToggle && (
         <button 
           onClick={() => setShowDetails(!showDetails)}
-          className="btn-primary mb-8 text-sm"
+          className="btn-primary mb-4 text-sm"
         >
-          {showDetails ? 'Hide Details' : 'See Detailed Results'}
+          {showDetails ? 'Back to Result' : 'See Detailed Results'}
         </button>
       )}
 
+      {/* Conditional rendering: either speedometer OR detailed results */}
       {showDetails ? (
-        <div className="glass-card w-full max-w-3xl max-h-[50vh] overflow-y-auto text-left p-0 mb-5">
+        /* Detailed results view */
+        <div className="glass-card w-full max-w-3xl max-h-[60vh] overflow-y-auto text-left p-0 mb-5">
           {questions.map((q, idx) => {
             const response = responses.find(r => r.questionId === q._id);
             const selectedOption = q.options?.find(opt => opt.type === response?.answerType);
@@ -35,7 +39,9 @@ const QuizResultView = ({ result, responses, quizData, selectedLang, showDetails
                 </div>
                 <div className={`px-4 py-1.5 rounded-full text-xs font-semibold text-center min-w-[100px] 
                   ${response?.answerType === 'In-Charge' 
-                    ? 'bg-indigo-500/20 text-indigo-400' 
+                    ? 'bg-blue-500/20 text-blue-400' 
+                    : response?.answerType === 'In-Control'
+                    ? 'bg-orange-500/20 text-orange-400'
                     : 'bg-white/10 text-text-secondary'
                   }`}>
                   {response?.answerType}
@@ -45,8 +51,9 @@ const QuizResultView = ({ result, responses, quizData, selectedLang, showDetails
           })}
         </div>
       ) : (
-        <div className="h-[400px] w-full flex justify-center">
-          <Ladder currentStep={currentStep} />
+        /* Speedometer view */
+        <div className="w-full h-auto flex flex-col items-center">
+          <Speedometer currentStep={currentStep} totalSteps={totalSteps} />
         </div>
       )}
     </div>

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Ladder from '../components/Ladder';
 import QuizHistory from '../components/QuizHistory';
+import Speedometer from '../components/Speedometer';
 import QuizResultView from '../components/QuizResultView';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
@@ -63,17 +64,23 @@ const QuizPage = () => {
           setResult(attempt);
           setResponses(attempt.responses);
           setCompleted(true);
-          setView('history'); // Redirect to history instead of result view
-          if (quizData.languages && quizData.languages.length > 0) {
-            setSelectedLang(quizData.languages[0]);
-          }
-          calculateStep(attempt.responses);
+          setView('history');
+          const lang = (quizData.languages && quizData.languages.length > 0) ? quizData.languages[0] : 'english';
+          setSelectedLang(lang);
+          
+          const questions = quizData.content?.[lang]?.questions || quizData.questions || [];
+          calculateStep(attempt.responses, questions.length);
         } else {
             setView('quiz');
             if (quizData.languages && quizData.languages.length === 1) {
-              setSelectedLang(quizData.languages[0]);
-            } else if (!quizData.languages) {
+              const lang = quizData.languages[0];
+              setSelectedLang(lang);
+              const questions = quizData.content?.[lang]?.questions || quizData.questions || [];
+              setCurrentStep(questions.length + 1);
+            } else if (!quizData.languages || quizData.languages.length === 0) {
               setSelectedLang('english');
+              const questions = quizData.questions || [];
+              setCurrentStep(questions.length + 1);
             }
         }
       } else {
@@ -96,17 +103,20 @@ const QuizPage = () => {
     }
   };
 
-  const calculateStep = (responses) => {
-    let step = 5;
+  const calculateStep = (responses, questionsCount) => {
+    let step = questionsCount + 1;
+    const maxStep = 2 * questionsCount + 1;
     responses.forEach(r => {
-      if (r.answerType === 'In-Charge') step = Math.min(step + 1, 10);
+      if (r.answerType === 'In-Charge') step = Math.min(step + 1, maxStep);
       else step = Math.max(step - 1, 1);
     });
     setCurrentStep(step);
   };
 
   const handleAnswer = (answerType) => {
-    const questions = quiz.content?.[selectedLang]?.questions || quiz.questions;
+    const langKey = selectedLang?.toLowerCase();
+    const questions = quiz.content?.[langKey]?.questions || quiz.questions;
+    const maxStep = 2 * questions.length + 1;
     const newResponses = [...responses, { 
       questionId: questions[currentQuestionIndex]._id, 
       answerType 
@@ -114,7 +124,7 @@ const QuizPage = () => {
     setResponses(newResponses);
 
     if (answerType === 'In-Charge') {
-      setCurrentStep(prev => Math.min(prev + 1, 10));
+      setCurrentStep(prev => Math.min(prev + 1, maxStep));
     } else {
       setCurrentStep(prev => Math.max(prev - 1, 1));
     }
@@ -144,13 +154,13 @@ const QuizPage = () => {
 
   const handleSelectHistoryQuiz = (attempt) => {
     setSelectedHistoryQuiz(attempt);
-    setShowDetails(true); // Directly show detailed results
+    setShowDetails(false); // Start with speedometer view
     setView('history-detail');
   };
 
   const renderNavbar = () => (
-    <header className="px-10 py-5 flex justify-between items-center border-b border-glass-border bg-bg-secondary/50 backdrop-blur-md sticky top-0 z-40">
-      <h2 className="text-xl font-bold text-accent-primary uppercase tracking-widest cursor-pointer" onClick={() => {
+    <header className="px-10 py-5 flex justify-between items-center border-b border-blue-200/10 bg-blue-900/50 backdrop-blur-md sticky top-0 z-40">
+      <h2 className="text-xl font-bold text-orange-500 uppercase tracking-widest cursor-pointer" onClick={() => {
           if (completed) setView('result');
           else if (quiz) setView('quiz');
           else setView('history');
@@ -211,7 +221,11 @@ const QuizPage = () => {
               {quiz.languages.map(lang => (
                 <button
                   key={lang}
-                  onClick={() => setSelectedLang(lang)}
+                  onClick={() => {
+                    setSelectedLang(lang);
+                    const questions = quiz.content?.[lang.toLowerCase()]?.questions || quiz.questions || [];
+                    setCurrentStep(questions.length + 1);
+                  }}
                   className="p-6 rounded-2xl border border-white/10 bg-white/5 hover:bg-accent-primary/10 hover:border-accent-primary/50 transition-all text-xl font-semibold active:scale-[0.98]"
                 >
                   {languageLabels[lang] || lang}
@@ -245,7 +259,7 @@ const QuizPage = () => {
                 <div className="w-full flex justify-start mb-6">
                     <button 
                         onClick={() => setView('history')}
-                        className="text-accent-primary hover:underline flex items-center gap-2"
+                        className="text-orange-500 hover:underline flex items-center gap-2"
                     >
                          &larr; Back to History
                     </button>
@@ -260,11 +274,20 @@ const QuizPage = () => {
                     selectedLang={selectedHistoryQuiz.language || Object.keys(selectedHistoryQuiz.quizContent || {})[0] || 'english'}
                     showDetails={showDetails}
                     setShowDetails={setShowDetails}
-                    hideToggle={true}
+                    hideToggle={false}
+                    totalSteps={(() => {
+                        const langKey = (selectedHistoryQuiz.language || 'english').toLowerCase();
+                        const questions = selectedHistoryQuiz.quizContent?.[langKey]?.questions || selectedHistoryQuiz.quizQuestions || [];
+                        return 2 * questions.length + 1;
+                    })()}
                     currentStep={(() => {
-                        let step = 5;
+                        const langKey = (selectedHistoryQuiz.language || 'english').toLowerCase();
+                        const questions = selectedHistoryQuiz.quizContent?.[langKey]?.questions || selectedHistoryQuiz.quizQuestions || [];
+                        const qCount = questions.length;
+                        let step = qCount + 1;
+                        const maxS = 2 * qCount + 1;
                         selectedHistoryQuiz.responses.forEach(r => {
-                            if (r.answerType === 'In-Charge') step = Math.min(step + 1, 10);
+                            if (r.answerType === 'In-Charge') step = Math.min(step + 1, maxS);
                             else step = Math.max(step - 1, 1);
                         });
                         return step;
@@ -282,6 +305,7 @@ const QuizPage = () => {
                 showDetails={showDetails}
                 setShowDetails={setShowDetails}
                 currentStep={currentStep}
+                totalSteps={2 * (quiz.content?.[selectedLang?.toLowerCase()]?.questions?.length || quiz.questions?.length || 0) + 1}
             />
         )}
 
@@ -290,7 +314,8 @@ const QuizPage = () => {
                 <div className="flex flex-col justify-center max-w-2xl mx-auto w-full">
                     <AnimatePresence mode="wait">
                         {(() => {
-                            const questions = quiz.content?.[selectedLang]?.questions || quiz.questions;
+                            const langKey = selectedLang?.toLowerCase();
+                            const questions = quiz.content?.[langKey]?.questions || quiz.questions;
                             const currentQuestion = questions[currentQuestionIndex];
                             return (
                                 <motion.div
@@ -322,10 +347,13 @@ const QuizPage = () => {
                     </AnimatePresence>
                 </div>
 
-                <div className="hidden lg:flex flex-col items-center bg-bg-secondary/30 rounded-3xl p-8 border border-glass-border h-[600px]">
+                <div className="hidden lg:flex flex-col items-center bg-bg-secondary/30 rounded-3xl p-8 border border-glass-border h-[600px] overflow-hidden">
                     <h3 className="text-lg font-bold mb-8 text-text-secondary">Your Progress</h3>
-                    <div className="flex-1 w-full flex justify-center">
-                        <Ladder currentStep={currentStep} />
+                    <div className="flex-1 w-full flex justify-center overflow-y-auto scrollbar-hide">
+                        <Ladder 
+                            currentStep={currentStep} 
+                            totalSteps={2 * (quiz.content?.[selectedLang?.toLowerCase()]?.questions?.length || quiz.questions?.length || 0) + 1}
+                        />
                     </div>
                 </div>
             </div>

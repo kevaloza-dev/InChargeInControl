@@ -221,7 +221,7 @@ const QuizEditor = ({ quiz, onSave, onCancel, readOnly = false }) => {
             <select 
               value={activeLang}
               onChange={(e) => setActiveLang(e.target.value)}
-              className="bg-transparent text-sm font-bold text-accent-primary outline-none cursor-pointer focus:ring-0 mr-2"
+              className="bg-transparent text-sm font-bold text-orange-500 outline-none cursor-pointer focus:ring-0 mr-2"
             >
               {formData.languages.map(lang => (
                 <option key={lang} value={lang} className="bg-bg-secondary">
@@ -250,7 +250,7 @@ const QuizEditor = ({ quiz, onSave, onCancel, readOnly = false }) => {
                   handleAddLanguage(name.trim().toLowerCase());
                 }
               }}
-              className="btn-secondary py-2 px-4 text-xs font-bold flex items-center gap-2 hover:bg-accent-primary/10 hover:text-accent-primary hover:border-accent-primary/50 transition-all"
+              className="btn-secondary py-2 px-4 text-xs font-bold flex items-center gap-2 hover:bg-orange-500/10 hover:text-orange-500 hover:border-orange-500/50 transition-all"
             >
               <Plus size={14} /> ADD LANGUAGE
             </button>
@@ -317,7 +317,7 @@ const QuizEditor = ({ quiz, onSave, onCancel, readOnly = false }) => {
             {currentContent.questions.map((q, qIdx) => (
               <div key={qIdx} className="p-6 bg-white/[0.02] rounded-2xl border border-white/[0.08]">
                 <div className="flex gap-4 mb-4">
-                  <span className="pt-3 font-bold text-accent-primary">Q{qIdx + 1}.</span>
+                  <span className="pt-3 font-bold text-orange-500">Q{qIdx + 1}.</span>
                   <input 
                     type="text" 
                     value={q.questionText}
@@ -371,7 +371,7 @@ const QuizEditor = ({ quiz, onSave, onCancel, readOnly = false }) => {
             <button 
               type="button" 
               onClick={handleAddQuestion}
-              className="btn-secondary w-full mt-6 py-4 border-dashed border-2 border-white/10 hover:border-accent-primary/50 text-accent-primary flex justify-center items-center gap-2"
+              className="btn-secondary w-full mt-6 py-4 border-dashed border-2 border-white/10 hover:border-orange-500/50 text-orange-500 flex justify-center items-center gap-2"
             >
               <Plus size={20} />
               Add More Questions (All Languages)

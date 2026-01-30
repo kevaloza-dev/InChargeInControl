@@ -294,7 +294,7 @@ const ProfilePage = () => {
         {showPasswordReset && (
           <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] flex items-center justify-center p-5">
             <div className="glass-card w-full max-w-xl p-8 md:p-12 relative overflow-hidden animate-in fade-in zoom-in duration-300">
-              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-purple-500 to-indigo-600" />
+              <div className="absolute top-0 left-0 w-full h-1 bg-blue-500" />
               <div className="flex justify-between items-center mb-8">
                 <h2 className="text-2xl font-bold flex items-center gap-3 m-0">
                   <Lock size={24} className="text-accent-primary" /> Reset Password

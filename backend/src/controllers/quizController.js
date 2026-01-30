@@ -23,8 +23,8 @@ const getActiveQuiz = async (req, res) => {
     // Check if user already attempted
     const attempt = await QuizAttempt.findOne({ userId: req.user.id, quizId: quiz._id });
     
-    // Convert to plain object to allow modification
-    const quizObj = quiz.toObject();
+    // Convert to JSON and flatten maps for easy manipulation and response
+    const quizJson = quiz.toJSON({ flattenMaps: true });
 
     // Helper to shuffle options
     const shuffleOptions = (questions) => {
@@ -39,26 +39,20 @@ const getActiveQuiz = async (req, res) => {
     };
 
     // Shuffle top-level questions (Legacy)
-    if (quizObj.questions) shuffleOptions(quizObj.questions);
+    if (quizJson.questions) shuffleOptions(quizJson.questions);
 
     // Shuffle multi-language content
-    if (quizObj.content) {
-      // If content is a Mongoose Map, Object.keys won't work on the map itself
-      // but quiz.toObject() usually converts it. Let's be safe.
-      const contentObj = (quizObj.content instanceof Map) 
-        ? Object.fromEntries(quizObj.content) 
-        : quizObj.content;
-
-      Object.keys(contentObj).forEach(lang => {
-        if (contentObj[lang] && contentObj[lang].questions) {
-          shuffleOptions(contentObj[lang].questions);
+    if (quizJson.content) {
+      Object.keys(quizJson.content).forEach(lang => {
+        if (quizJson.content[lang] && quizJson.content[lang].questions) {
+          shuffleOptions(quizJson.content[lang].questions);
         }
       });
     }
 
     // Return quiz and attempt data
     res.json({
-      quiz: quiz.toJSON({ flattenMaps: true }),
+      quiz: quizJson,
       alreadyAttempted: !!attempt,
       attempt: attempt || null
     });
@@ -86,9 +80,26 @@ const submitQuiz = async (req, res) => {
       else if (resp.answerType === 'In-Control') inControl++;
     });
 
+    const totalQuestions = responses.length;
+    const netScore = inCharge - inControl;
+    
+    // Result logic based on distance to Top (totalQuestions), Middle (0), or Bottom (-totalQuestions)
     let result = 'Balanced';
-    if (inCharge > 5) result = 'In-Charge';
-    else if (inControl > 5) result = 'In-Control';
+    const distTop = Math.abs(totalQuestions - netScore);
+    const distMid = Math.abs(0 - netScore);
+    const distBot = Math.abs(-totalQuestions - netScore);
+
+    // Find the smallest distance
+    const minDist = Math.min(distTop, distMid, distBot);
+
+    // Map the smallest distance back to the state (prioritize Balanced in case of ties)
+    if (minDist === distMid) {
+      result = 'Balanced';
+    } else if (minDist === distTop) {
+      result = 'In-Charge';
+    } else if (minDist === distBot) {
+      result = 'In-Control';
+    }
 
     const attempt = await QuizAttempt.create({
       userId: req.user.id,

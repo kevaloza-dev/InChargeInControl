@@ -1,8 +1,8 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 
-const Ladder = ({ currentStep, orientation = 'vertical' }) => {
-  const steps = Array.from({ length: 10 }, (_, i) => i + 1);
+const Ladder = ({ currentStep, totalSteps = 10, orientation = 'vertical' }) => {
+  const steps = Array.from({ length: totalSteps }, (_, i) => i + 1);
   const isHorizontal = orientation === 'horizontal';
 
   return (

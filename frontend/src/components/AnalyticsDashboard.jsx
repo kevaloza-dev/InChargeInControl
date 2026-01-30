@@ -207,8 +207,8 @@ const AnalyticsDashboard = () => {
                   <td className="p-4">{user.score}</td>
                   <td className="p-4">
                     <span className={`px-2.5 py-1 rounded text-xs font-semibold ${
-                      user.result === 'In-Charge' ? 'bg-indigo-500/20 text-indigo-400' : 
-                      user.result === 'In-Control' ? 'bg-purple-500/20 text-purple-400' : 
+                      user.result === 'In-Charge' ? 'bg-blue-500/20 text-blue-400' : 
+                      user.result === 'In-Control' ? 'bg-orange-500/20 text-orange-400' : 
                       'bg-slate-500/20 text-slate-400'
                     }`}>
                       {user.result || 'N/A'}
