@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { Mail, Lock } from 'lucide-react';
+import { Mail, Lock, ArrowLeft } from 'lucide-react';
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
@@ -31,22 +31,33 @@ const LoginPage = () => {
       <div className="absolute -bottom-1/4 -right-1/4 w-1/2 h-1/2 bg-gradient-radial from-orange-500 to-transparent rounded-full opacity-15 blur-3xl animate-float2" />
 
       <div className="glass-card w-full max-w-md p-8 sm:p-10 relative z-10 mx-4 sm:mx-0 shadow-2xl border-blue-200/10 bg-white/5 backdrop-blur-xl rounded-3xl">
+        {/* Back Button */}
+        <button 
+          onClick={() => navigate('/')}
+          className="absolute top-6 left-6 text-white/50 hover:text-white transition-colors flex items-center gap-2 text-sm group"
+        >
+          <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+          <span>Back</span>
+        </button>
+
         {/* Header */}
-        <div className="text-center mb-10">
+        <div className="text-center mb-10 mt-4">
           <div className="relative inline-block mb-2">
             <h1 className="text-3xl sm:text-5xl font-black tracking-tight bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent drop-shadow-lg">
-              In-Charge
+            Are
+          </h1>
+            
+          
+          <h2 className="text-2xl sm:text-4xl font-extrabold text-white/90 -tracking-tight mb-2 mt-2">
+            you
+          </h2>
+          
+          <h1 className="text-3xl sm:text-5xl font-black tracking-tight bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent drop-shadow-lg">
+              Ready?
             </h1>
             <div className="absolute -bottom-1 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-blue-500 to-transparent rounded-full opacity-80" />
           </div>
           
-          <h2 className="text-2xl sm:text-4xl font-extrabold text-white/90 -tracking-tight mb-2">
-            OR
-          </h2>
-          
-          <h1 className="text-3xl sm:text-5xl font-black tracking-tight bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent drop-shadow-lg">
-            In-Control
-          </h1>
           
           <p className="text-white/60 mt-6 text-lg leading-relaxed">
             Sign in to continue to your dashboard

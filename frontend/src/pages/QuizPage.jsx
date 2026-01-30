@@ -159,7 +159,7 @@ const QuizPage = () => {
   };
 
   const renderNavbar = () => (
-    <header className="px-10 py-5 flex justify-between items-center border-b border-blue-200/10 bg-blue-900/50 backdrop-blur-md sticky top-0 z-40">
+    <header className="px-4 md:px-10 py-3 md:py-5 flex justify-between items-center border-b border-blue-200/10 bg-blue-900/50 backdrop-blur-md sticky top-0 z-40">
       <h2 className="text-xl font-bold text-orange-500 uppercase tracking-widest cursor-pointer" onClick={() => {
           if (completed) setView('result');
           else if (quiz) setView('quiz');
@@ -239,27 +239,27 @@ const QuizPage = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-bg-primary">
+    <div className="h-screen flex flex-col bg-bg-primary overflow-hidden">
       {renderNavbar()}
       
-      <main className="flex-1 p-5 md:p-10 flex flex-col items-center max-w-7xl mx-auto w-full">
+      <main className="flex-1 p-4 md:p-6 lg:pt-8 flex flex-col items-center max-w-7xl mx-auto w-full overflow-hidden justify-center lg:justify-start">
         
         {view === 'history' && (
             <motion.div 
                 initial={{ opacity: 0 }} 
                 animate={{ opacity: 1 }}
-                className="w-full"
+                className="w-full flex-1 overflow-y-auto mt-4 px-2"
             >
                 <QuizHistory history={history} onSelectQuiz={handleSelectHistoryQuiz} />
             </motion.div>
         )}
-
+ 
         {view === 'history-detail' && selectedHistoryQuiz && (
-            <div className="w-full flex flex-col items-center">
-                <div className="w-full flex justify-start mb-6">
+            <div className="w-full flex-1 flex flex-col items-center overflow-hidden">
+                <div className="w-full flex justify-start mb-4">
                     <button 
                         onClick={() => setView('history')}
-                        className="text-orange-500 hover:underline flex items-center gap-2"
+                        className="text-orange-500 hover:underline flex items-center gap-2 text-sm"
                     >
                          &larr; Back to History
                     </button>
@@ -347,7 +347,7 @@ const QuizPage = () => {
                     </AnimatePresence>
                 </div>
 
-                <div className="hidden lg:flex flex-col items-center bg-bg-secondary/30 rounded-3xl p-8 border border-glass-border h-[600px] overflow-hidden">
+                <div className="hidden lg:flex flex-col items-center bg-bg-secondary/30 rounded-3xl p-8 border border-glass-border h-[400px] xl:h-[600px] overflow-hidden">
                     <h3 className="text-lg font-bold mb-8 text-text-secondary">Your Progress</h3>
                     <div className="flex-1 w-full flex justify-center overflow-y-auto scrollbar-hide">
                         <Ladder 
