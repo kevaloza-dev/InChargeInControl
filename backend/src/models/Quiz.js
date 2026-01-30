@@ -1,13 +1,29 @@
 const mongoose = require('mongoose');
 
 const quizSchema = new mongoose.Schema({
-  title: { type: String, required: true },
+  languages: [{ type: String, default: ['english'] }],
+  content: {
+    type: Map,
+    of: {
+      title: { type: String },
+      description: { type: String },
+      questions: [{
+        questionText: { type: String },
+        options: [{
+          text: { type: String },
+          type: { type: String, enum: ['In-Charge', 'In-Control'], required: true }
+        }]
+      }]
+    }
+  },
+  // Legacy fields for backward compatibility
+  title: { type: String }, 
   description: { type: String },
   questions: [{
-    questionText: { type: String, required: true },
+    questionText: { type: String },
     options: [{
-      text: { type: String, required: true },
-      type: { type: String, enum: ['In-Charge', 'In-Control'], required: true }
+      text: { type: String },
+      type: { type: String, enum: ['In-Charge', 'In-Control'] }
     }]
   }],
   status: { 
@@ -21,7 +37,7 @@ const quizSchema = new mongoose.Schema({
     default: 'MANUAL' 
   },
   requiresAdminApproval: { type: Boolean, default: false },
-  activeDate: { type: Date } // Unique enforcement moved to controller logic to allow drafts
+  activeDate: { type: Date } 
 }, { timestamps: true });
 
 module.exports = mongoose.model('Quiz', quizSchema);

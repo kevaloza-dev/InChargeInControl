@@ -282,12 +282,8 @@ const AdminDashboard = () => {
                  quizzes={quizzes} 
                  onEdit={handleEditQuiz} 
                  onRefresh={fetchQuizzes}
-                 onView={(quiz) => {
-                   setSelectedQuiz(quiz);
-                   setQuizView('view');
-                 }}
                />
-             ) : quizView === 'editor' ? (
+             ) : (
                <QuizEditor 
                  quiz={selectedQuiz} 
                  onSave={() => {
@@ -296,15 +292,6 @@ const AdminDashboard = () => {
                  }} 
                  onCancel={() => setQuizView('list')} 
                />
-             ) : (
-                <div className="relative">
-                    <QuizEditor 
-                        quiz={selectedQuiz} 
-                        onSave={() => setQuizView('list')} // Should not be called in readOnly but safe to have
-                        onCancel={() => setQuizView('list')} 
-                        readOnly={true}
-                    />
-                </div>
              )}
            </div>
         )}

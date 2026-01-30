@@ -10,10 +10,19 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     if (token) {
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      // Ideally, verify token with backend here
-      const savedUser = localStorage.getItem('user');
-      if (savedUser) setUser(JSON.parse(savedUser));
+      try {
+        axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+        const savedUser = localStorage.getItem('user');
+        if (savedUser) {
+          setUser(JSON.parse(savedUser));
+        }
+      } catch (err) {
+        console.error('Auth initialization failed:', err);
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        setToken(null);
+        setUser(null);
+      }
     }
     setLoading(false);
   }, [token]);

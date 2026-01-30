@@ -78,8 +78,6 @@ node seed.js
 ### 3. Password Management
 The password update page is restricted to users who are required to change their password (those with the `firstLoginRequired` flag set to `true`). After a successful update, users are automatically redirected to their dashboard and cannot manually return to the reset page.
 
-The update page is available at: `http://localhost:5173/update-password`
-
 ### 4. Frontend Setup
 Navigate to the frontend directory and install dependencies:
 ```bash

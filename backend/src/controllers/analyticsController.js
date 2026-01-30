@@ -103,10 +103,17 @@ const getAnalytics = async (req, res) => {
 
     const roleDistribution = roleDist.filter(item => item.value > 0);
 
-    // C. Accuracy Comparison (Bar Chart)
-    const accuracyData = [
-        { name: 'Average Scores', InCharge: avgInCharge.toFixed(1), InControl: avgInControl.toFixed(1) }
-    ];
+    // C. Language Distribution (Bar Chart)
+    const langCounts = {};
+    attempts.forEach(att => {
+        const lang = att.language || 'english';
+        langCounts[lang] = (langCounts[lang] || 0) + 1;
+    });
+
+    const languageDistribution = Object.keys(langCounts).map(lang => ({
+        name: lang.charAt(0).toUpperCase() + lang.slice(1),
+        attempts: langCounts[lang]
+    }));
 
     // D. Top 5 Users (by In-Charge Score desc, then In-Control)
     // Or just "Score" meaning "Highest Score in their dominant trait"
@@ -120,7 +127,7 @@ const getAnalytics = async (req, res) => {
         .sort((a, b) => b.score - a.score)
         .slice(0, 5);
 
-    // 5. Table Data (Paginated handled by frontend usually, but we send full list for now if small, or paginate here. User said "Paginated", but strict backend pagination requires page/limit params. I'll send all for now as dataset is likely small, or implementing basic limitation is better. Let's send all and let frontend paginate or implement slice.)
+    // 5. Table Data
     const usersTable = filteredUsers.map(u => ({
         id: u._id,
         name: u.name,
@@ -134,13 +141,13 @@ const getAnalytics = async (req, res) => {
     res.json({
       stats: {
         totalUsers,
-        avgScore: (avgInCharge + avgInControl) / 2, // Overall average points? Or just InCharge? Let's send both or average.
+        avgScore: (avgInCharge + avgInControl) / 2,
         inChargeAccuracy,
         inControlAccuracy
       },
       userGrowth,
       roleDistribution,
-      accuracyData,
+      languageDistribution,
       topUsers: topUsersData,
       usersTable
     });

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
-import { User, Mail, Phone, Camera, Save, ArrowLeft, Loader2, Lock } from 'lucide-react';
+import { User, Mail, Phone, Camera, Save, ArrowLeft, Loader2, Lock, History } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const ProfilePage = () => {
@@ -133,12 +133,20 @@ const ProfilePage = () => {
   return (
     <div className="min-h-screen bg-bg-primary py-10 px-5 md:py-20">
       <div className="max-w-3xl mx-auto">
-        <button 
-          onClick={() => navigate(-1)}
-          className="flex items-center gap-2 text-text-secondary hover:text-white mb-8 transition-colors"
-        >
-          <ArrowLeft size={20} /> Back
-        </button>
+        <div className="flex justify-between items-center mb-8">
+          <button 
+            onClick={() => navigate(-1)}
+            className="flex items-center gap-2 text-text-secondary hover:text-white transition-colors"
+          >
+            <ArrowLeft size={20} /> Back
+          </button>
+          <button 
+            onClick={() => navigate('/quiz')}
+            className="flex items-center gap-2 text-text-secondary hover:text-white transition-colors"
+          >
+            <History size={18} /> Quiz History
+          </button>
+        </div>
 
         <div className="glass-card p-8 md:p-12 relative overflow-hidden mb-10">
           <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-accent-primary to-accent-secondary" />

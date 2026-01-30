@@ -12,6 +12,7 @@ const quizAttemptSchema = new mongoose.Schema({
     inControl: { type: Number, default: 0 }
   },
   result: { type: String, enum: ['In-Charge', 'In-Control', 'Balanced'] },
+  language: { type: String, default: 'english' },
   completedAt: { type: Date, default: Date.now }
 }, { timestamps: true });
 

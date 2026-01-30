@@ -1,30 +1,55 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Sparkles, Save, X, Trash2, Plus } from 'lucide-react';
+import { Save, X, Trash2, Plus } from 'lucide-react';
 
 const QuizEditor = ({ quiz, onSave, onCancel, readOnly = false }) => {
   const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    questions: []
+    languages: ['english'],
+    content: {
+      english: { title: '', description: '', questions: [] }
+    },
+    activeDate: ''
   });
+  const [activeLang, setActiveLang] = useState('english');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  const availableLanguages = [
+    { id: 'english', label: 'English' },
+    { id: 'hindi', label: 'Hindi' },
+    { id: 'gujarati', label: 'Gujarati' },
+    { id: 'malayalam', label: 'Malayalam' }
+  ];
+
   useEffect(() => {
     if (quiz) {
+      // Map-based content comes as an object in JS
+      const content = quiz.content || {
+        english: { 
+          title: quiz.title, 
+          description: quiz.description, 
+          questions: quiz.questions 
+        }
+      };
+      const languages = quiz.languages || Object.keys(content);
+      
       setFormData({
-        title: quiz.title,
-        description: quiz.description || '',
-        activeDate: quiz.activeDate ? new Date(quiz.activeDate).toISOString().split('T')[0] : '',
-        questions: quiz.questions || []
+        languages,
+        content,
+        activeDate: quiz.activeDate ? new Date(quiz.activeDate).toISOString().split('T')[0] : ''
       });
+      setActiveLang(languages[0] || 'english');
     } else {
       setFormData({
-        title: '',
-        description: '',
-        activeDate: '',
-        questions: Array.from({ length: 10 }, (_, i) => createEmptyQuestion(i))
+        languages: ['english'],
+        content: {
+          english: { 
+            title: '', 
+            description: '', 
+            questions: Array.from({ length: 2 }, (_, i) => createEmptyQuestion(i)) 
+          }
+        },
+        activeDate: ''
       });
     }
   }, [quiz]);
@@ -39,41 +64,111 @@ const QuizEditor = ({ quiz, onSave, onCancel, readOnly = false }) => {
     ]
   });
 
-  const handleGenerateAI = async () => {
+  const handleAddLanguage = (langId) => {
+    if (formData.languages.includes(langId)) return;
+    
+    // Copy questions structure from English if it exists, otherwise empty
+    const templateQuestions = formData.content.english 
+      ? formData.content.english.questions.map(q => ({
+          ...q,
+          questionText: '',
+          options: q.options.map(o => ({ ...o, text: '' }))
+        }))
+      : Array.from({ length: 2 }, (_, i) => createEmptyQuestion(i));
+
+    setFormData({
+      ...formData,
+      languages: [...formData.languages, langId],
+      content: {
+        ...formData.content,
+        [langId]: {
+          title: '',
+          description: '',
+          questions: templateQuestions
+        }
+      }
+    });
+    setActiveLang(langId);
+  };
+
+  const handleRemoveLanguage = (lang) => {
     if (readOnly) return;
-    if (!window.confirm("This will overwrite current content with AI generated draft. Continue?")) return;
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await axios.post('http://localhost:5000/api/admin/quizzes/generate-ai');
-      const newQuiz = res.data;
-      setFormData({
-        title: newQuiz.title,
-        description: newQuiz.description,
-        questions: newQuiz.questions
-      });
-      alert('AI Quiz Generated! You can now review and edit.');
-    } catch (err) {
-      setError("AI Generation failed: " + (err.response?.data?.error || err.message));
-    } finally {
-      setLoading(false);
+    if (formData.languages.length <= 1) {
+      alert("A quiz must have at least one language.");
+      return;
     }
+    if (!window.confirm(`Are you sure you want to delete the ${lang.toUpperCase()} version of this quiz?`)) return;
+
+    const newLangs = formData.languages.filter(l => l !== lang);
+    const newContent = { ...formData.content };
+    delete newContent[lang];
+
+    setFormData({
+      ...formData,
+      languages: newLangs,
+      content: newContent
+    });
+    setActiveLang(newLangs[0]);
+  };
+
+  const handleAddQuestion = () => {
+    if (readOnly) return;
+    const updatedContent = { ...formData.content };
+    
+    // Add question to ALL languages to keep them in sync
+    formData.languages.forEach(lang => {
+      updatedContent[lang].questions = [
+        ...updatedContent[lang].questions,
+        createEmptyQuestion(updatedContent[lang].questions.length)
+      ];
+    });
+
+    setFormData({ ...formData, content: updatedContent });
+  };
+
+  const handleRemoveQuestion = (idx) => {
+    if (readOnly) return;
+    if (formData.content[activeLang].questions.length <= 1) {
+      alert("At least one question is required.");
+      return;
+    }
+    
+    const updatedContent = { ...formData.content };
+    formData.languages.forEach(lang => {
+      updatedContent[lang].questions = updatedContent[lang].questions.filter((_, i) => i !== idx);
+    });
+
+    setFormData({ ...formData, content: updatedContent });
+  };
+
+  const handleContentChange = (field, value) => {
+    if (readOnly) return;
+    setFormData({
+      ...formData,
+      content: {
+        ...formData.content,
+        [activeLang]: {
+          ...formData.content[activeLang],
+          [field]: value
+        }
+      }
+    });
   };
 
   const handleQuestionChange = (idx, field, value) => {
     if (readOnly) return;
-    const updated = [...formData.questions];
-    updated[idx][field] = value;
-    setFormData({ ...formData, questions: updated });
+    const questions = [...formData.content[activeLang].questions];
+    questions[idx][field] = value;
+    handleContentChange('questions', questions);
   };
 
   const handleOptionChange = (qIdx, oIdx, field, value) => {
     if (readOnly) return;
-    const updatedQuestions = [...formData.questions];
-    const updatedOptions = [...updatedQuestions[qIdx].options];
-    updatedOptions[oIdx][field] = value;
-    updatedQuestions[qIdx].options = updatedOptions;
-    setFormData({ ...formData, questions: updatedQuestions });
+    const questions = [...formData.content[activeLang].questions];
+    const options = [...questions[qIdx].options];
+    options[oIdx][field] = value;
+    questions[qIdx].options = options;
+    handleContentChange('questions', questions);
   };
 
   const handleSubmit = async (e) => {
@@ -84,22 +179,28 @@ const QuizEditor = ({ quiz, onSave, onCancel, readOnly = false }) => {
     }
     setError(null);
 
-    // Basic Client validation logic
-    if (formData.questions.length !== 10) {
-      setError("Must have exactly 10 questions.");
-      return;
+    // Basic Client validation
+    for (const lang of formData.languages) {
+      if (formData.content[lang].questions.length < 1) {
+        setError(`Language ${lang} must have at least 1 question.`);
+        return;
+      }
     }
 
     try {
       setLoading(true);
+      const payload = {
+        languages: formData.languages,
+        content: formData.content,
+        activeDate: formData.activeDate
+      };
+
       if (quiz) {
-        // Update
-        await axios.put(`http://localhost:5000/api/admin/quizzes/${quiz._id}`, formData);
+        await axios.put(`http://localhost:5000/api/admin/quizzes/${quiz._id}`, payload);
       } else {
-        // Create
-        await axios.post('http://localhost:5000/api/admin/quizzes', formData);
+        await axios.post('http://localhost:5000/api/admin/quizzes', payload);
       }
-      onSave(); // Close editor
+      onSave();
     } catch (err) {
       setError(err.response?.data?.error || 'Save failed');
     } finally {
@@ -107,21 +208,54 @@ const QuizEditor = ({ quiz, onSave, onCancel, readOnly = false }) => {
     }
   };
 
+  const currentContent = formData.content[activeLang] || { title: '', description: '', questions: [] };
+
   return (
     <div className="glass-card p-8 max-w-5xl mx-auto">
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
         <h2 className="text-2xl font-bold">{readOnly ? 'View Quiz' : (quiz ? 'Edit Quiz' : 'Create New Quiz')}</h2>
-        {!quiz && !readOnly && (
-          <button 
-            type="button" 
-            onClick={handleGenerateAI} 
-            className="btn-secondary bg-gradient-to-br from-indigo-500 to-purple-500 border-none text-white hover:opacity-90"
-            disabled={loading}
-          >
-            <Sparkles size={18} />
-            {loading ? 'Generating...' : 'Generate with AI'}
-          </button>
-        )}
+        
+        <div className="flex items-center gap-3">
+          <div className="flex items-center bg-white/5 px-4 py-2 rounded-xl border border-white/10">
+            <span className="text-xs font-bold text-text-secondary mr-3 tracking-wider">ACTIVE LANGUAGE:</span>
+            <select 
+              value={activeLang}
+              onChange={(e) => setActiveLang(e.target.value)}
+              className="bg-transparent text-sm font-bold text-accent-primary outline-none cursor-pointer focus:ring-0 mr-2"
+            >
+              {formData.languages.map(lang => (
+                <option key={lang} value={lang} className="bg-bg-secondary">
+                  {availableLanguages.find(l => l.id === lang)?.label || lang.toUpperCase()}
+                </option>
+              ))}
+            </select>
+            {!readOnly && (
+              <button
+                type="button"
+                onClick={() => handleRemoveLanguage(activeLang)}
+                className="text-text-secondary hover:text-error transition-colors ml-1 p-1"
+                title="Delete this language version"
+              >
+                <Trash2 size={16} />
+              </button>
+            )}
+          </div>
+          
+          {!readOnly && (
+            <button 
+              type="button" 
+              onClick={() => {
+                const name = prompt("Enter language name (e.g. Hindi, Spanish):");
+                if (name && name.trim()) {
+                  handleAddLanguage(name.trim().toLowerCase());
+                }
+              }}
+              className="btn-secondary py-2 px-4 text-xs font-bold flex items-center gap-2 hover:bg-accent-primary/10 hover:text-accent-primary hover:border-accent-primary/50 transition-all"
+            >
+              <Plus size={14} /> ADD LANGUAGE
+            </button>
+          )}
+        </div>
       </div>
 
       {error && (
@@ -133,47 +267,54 @@ const QuizEditor = ({ quiz, onSave, onCancel, readOnly = false }) => {
       <form onSubmit={handleSubmit}>
         <fieldset disabled={readOnly} className="border-none p-0 m-0 disabled:opacity-80">
           <div className="mb-6">
-            <label className="block text-sm font-medium text-text-secondary mb-2">Quiz Title</label>
+            <label className="block text-sm font-medium text-text-secondary mb-2">Quiz Title ({activeLang})</label>
             <input 
               type="text" 
-              value={formData.title} 
-              onChange={(e) => setFormData({...formData, title: e.target.value})}
+              value={currentContent.title} 
+              onChange={(e) => handleContentChange('title', e.target.value)}
               required
               disabled={readOnly}
               className="input-base text-lg font-semibold"
+              placeholder={`Enter title in ${availableLanguages.find(l => l.id === activeLang)?.label}...`}
             />
           </div>
 
           <div className="mb-8">
-            <label className="block text-sm font-medium text-text-secondary mb-2">Description</label>
+            <label className="block text-sm font-medium text-text-secondary mb-2">Description ({activeLang})</label>
             <textarea 
-              value={formData.description} 
-              onChange={(e) => setFormData({...formData, description: e.target.value})}
+              value={currentContent.description} 
+              onChange={(e) => handleContentChange('description', e.target.value)}
               rows="2"
               disabled={readOnly}
               className="input-base resize-y min-h-[80px]"
+              placeholder={`Enter description in ${availableLanguages.find(l => l.id === activeLang)?.label}...`}
             />
           </div>
 
-          <div className="mb-8">
-            <label className="block text-sm font-medium text-text-secondary mb-2">Active Date (Optional)</label>
-            <input 
-              type="date" 
-              value={formData.activeDate} 
-              onChange={(e) => setFormData({...formData, activeDate: e.target.value})}
-              disabled={readOnly}
-              className="input-base max-w-xs"
-            />
-            {!readOnly && (
-              <p className="text-xs text-text-secondary mt-2">
-                Setting a date here plans the quiz but does not activate it. Use the 'Activate' button in the list to go live.
-              </p>
-            )}
+          <div className="mb-8 p-6 bg-white/[0.02] rounded-2xl border border-white/[0.08]">
+            <label className="block text-sm font-medium text-text-secondary mb-2">Global Settings</label>
+            <div className="flex flex-col gap-4">
+              <div>
+                <label className="block text-xs text-text-secondary mb-1">Active Date (Optional)</label>
+                <input 
+                  type="date" 
+                  value={formData.activeDate} 
+                  onChange={(e) => setFormData({...formData, activeDate: e.target.value})}
+                  disabled={readOnly}
+                  className="input-base max-w-xs"
+                />
+              </div>
+              {!readOnly && (
+                <p className="text-xs text-text-secondary">
+                  Active date applies to all language versions. Use the 'Activate' button in the list to go live.
+                </p>
+              )}
+            </div>
           </div>
 
-          <h3 className="text-xl font-bold mb-4">Questions (10 Required)</h3>
+          <h3 className="text-xl font-bold mb-4">Questions ({activeLang})</h3>
           <div className="flex flex-col gap-6">
-            {formData.questions.map((q, qIdx) => (
+            {currentContent.questions.map((q, qIdx) => (
               <div key={qIdx} className="p-6 bg-white/[0.02] rounded-2xl border border-white/[0.08]">
                 <div className="flex gap-4 mb-4">
                   <span className="pt-3 font-bold text-accent-primary">Q{qIdx + 1}.</span>
@@ -181,11 +322,21 @@ const QuizEditor = ({ quiz, onSave, onCancel, readOnly = false }) => {
                     type="text" 
                     value={q.questionText}
                     onChange={(e) => handleQuestionChange(qIdx, 'questionText', e.target.value)}
-                    placeholder="Enter question text..."
+                    placeholder={`Enter question in ${availableLanguages.find(l => l.id === activeLang)?.label}...`}
                     required
                     disabled={readOnly}
                     className="input-base flex-1"
                   />
+                  {!readOnly && (
+                    <button 
+                      type="button" 
+                      onClick={() => handleRemoveQuestion(qIdx)}
+                      className="text-text-secondary hover:text-error transition-colors p-2"
+                      title="Remove Question"
+                    >
+                      <Trash2 size={20} />
+                    </button>
+                  )}
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pl-0 sm:pl-10">
@@ -215,6 +366,17 @@ const QuizEditor = ({ quiz, onSave, onCancel, readOnly = false }) => {
               </div>
             ))}
           </div>
+
+          {!readOnly && (
+            <button 
+              type="button" 
+              onClick={handleAddQuestion}
+              className="btn-secondary w-full mt-6 py-4 border-dashed border-2 border-white/10 hover:border-accent-primary/50 text-accent-primary flex justify-center items-center gap-2"
+            >
+              <Plus size={20} />
+              Add More Questions (All Languages)
+            </button>
+          )}
         </fieldset>
 
         <div className="mt-8 flex gap-4 justify-end">

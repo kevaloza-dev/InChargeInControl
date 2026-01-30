@@ -1,14 +1,13 @@
 const Quiz = require('../models/Quiz');
-const { generateQuizDraft } = require('../services/aiService');
 const { validateQuizStructure } = require('../utils/quizValidation');
 
 // Create Manual Quiz
 const createQuiz = async (req, res) => {
   try {
-    const { title, description, questions, activeDate } = req.body;
+    const { title, description, questions, activeDate, languages, content } = req.body;
 
-    // Strict Validation
-    const validation = validateQuizStructure({ questions });
+    // Validation
+    const validation = validateQuizStructure({ questions, content, languages });
     if (!validation.isValid) {
       return res.status(400).json({ error: validation.error });
     }
@@ -19,10 +18,23 @@ const createQuiz = async (req, res) => {
       parsedActiveDate = new Date(`${datePart}T00:00:00.000Z`);
     }
 
+    // Prepare legacy fields from English for backward compatibility
+    let legacyTitle = title;
+    let legacyDesc = description;
+    let legacyQuestions = questions;
+
+    if (content && content.english) {
+      legacyTitle = content.english.title;
+      legacyDesc = content.english.description;
+      legacyQuestions = content.english.questions;
+    }
+
     const newQuiz = await Quiz.create({
-      title,
-      description,
-      questions,
+      title: legacyTitle,
+      description: legacyDesc,
+      questions: legacyQuestions,
+      languages: languages || ['english'],
+      content,
       activeDate: parsedActiveDate,
       status: 'DRAFT',
       generatedBy: 'MANUAL',
@@ -35,54 +47,37 @@ const createQuiz = async (req, res) => {
   }
 };
 
-// Generate with AI
-const generateAIGeneratedQuiz = async (req, res) => {
-  try {
-    const draft = await generateQuizDraft(); 
-    
-    // Add default title/desc if missing from AI
-    const title = draft.title || `AI Generated Quiz - ${new Date().toISOString().split('T')[0]}`;
-    const description = draft.description || "Automatically generated quiz draft.";
 
-    const newQuiz = await Quiz.create({
-      title,
-      description,
-      questions: draft.questions,
-      status: 'DRAFT',
-      generatedBy: 'AI',
-      requiresAdminApproval: true
-    });
-
-    res.status(201).json(newQuiz);
-  } catch (error) {
-    res.status(500).json({ error: "AI Generation failed: " + error.message });
-  }
-};
-
-// Update Quiz (Draft only)
+// Update Quiz
 const updateQuiz = async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, description, questions, activeDate } = req.body;
+    const { title, description, questions, activeDate, languages, content } = req.body;
 
     const quiz = await Quiz.findById(id);
     if (!quiz) return res.status(404).json({ error: 'Quiz not found' });
 
-    if (quiz.status === 'ACTIVE') {
-      return res.status(400).json({ error: 'Cannot edit an ACTIVE quiz. Deactivate it first.' });
+    // Validate
+    const validation = validateQuizStructure({ questions, content, languages });
+    if (!validation.isValid) {
+      return res.status(400).json({ error: validation.error });
     }
 
-    // Validate if questions are being updated
-    if (questions) {
-      const validation = validateQuizStructure({ questions });
-      if (!validation.isValid) {
-        return res.status(400).json({ error: validation.error });
+    if (content) {
+      quiz.content = content;
+      quiz.markModified('content');
+      // Update legacy fields if English version is provided
+      if (content.english) {
+        quiz.title = content.english.title;
+        quiz.description = content.english.description;
+        quiz.questions = content.english.questions;
       }
-      quiz.questions = questions;
     }
 
-    if (title) quiz.title = title;
-    if (description) quiz.description = description;
+    if (languages) quiz.languages = languages;
+    if (title && !content) quiz.title = title;
+    if (description && !content) quiz.description = description;
+    if (questions && !content) quiz.questions = questions;
     if (activeDate !== undefined) {
       if (activeDate) {
         const datePart = new Date(activeDate).toISOString().split('T')[0];
@@ -134,10 +129,10 @@ const approveQuiz = async (req, res) => {
       return res.status(400).json({ error: 'Only DRAFT quizzes can be approved.' });
     }
 
-    // Final validation check before approval
-    const validation = validateQuizStructure({ questions: quiz.questions });
+    // Final validation check before approval (enforce full content completeness)
+    const validation = validateQuizStructure(quiz, true);
     if (!validation.isValid) {
-      return res.status(400).json({ error: `Cannot approve invalid quiz: ${validation.error}` });
+      return res.status(400).json({ error: `Cannot approve incomplete quiz: ${validation.error}` });
     }
 
     quiz.status = 'APPROVED';
@@ -192,12 +187,23 @@ const activateQuiz = async (req, res) => {
   }
 };
 
+const deleteQuiz = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const quiz = await Quiz.findByIdAndDelete(id);
+    if (!quiz) return res.status(404).json({ error: 'Quiz not found' });
+    res.json({ message: 'Quiz deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 module.exports = {
   createQuiz,
-  generateAIGeneratedQuiz,
   updateQuiz,
   getQuizzes,
   getQuizById,
   approveQuiz,
-  activateQuiz
+  activateQuiz,
+  deleteQuiz
 };

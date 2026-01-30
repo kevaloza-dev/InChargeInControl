@@ -33,7 +33,9 @@ const UpdatePasswordPage = () => {
     setLoading(true);
     try {
       await axios.post('http://localhost:5000/api/auth/update-password', { newPassword });
-      setUser({ ...user, firstLoginRequired: false });
+      const updatedUser = { ...user, firstLoginRequired: false };
+      setUser(updatedUser);
+      localStorage.setItem('user', JSON.stringify(updatedUser));
       navigate(user.role === 'admin' ? '/admin' : '/quiz');
     } catch (err) {
       setError('Failed to update password. Please try again.');

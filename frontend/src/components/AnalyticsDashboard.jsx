@@ -148,19 +148,18 @@ const AnalyticsDashboard = () => {
 
       {/* Charts Row 2 */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-        {/* Accuracy Comparison */}
+        {/* Language Distribution */}
         <div className="glass-card p-6 min-h-[350px] flex flex-col">
-          <h3 className="text-lg font-bold mb-6">Accuracy Comparison</h3>
+          <h3 className="text-lg font-bold mb-6">Language Distribution</h3>
           <div className="flex-1 w-full h-[250px]">
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={data.accuracyData}>
+            <BarChart data={data.languageDistribution}>
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.08)" />
               <XAxis dataKey="name" stroke="#94a3b8" />
               <YAxis stroke="#94a3b8" />
               <Tooltip contentStyle={{ backgroundColor: '#141417', border: '1px solid rgba(255,255,255,0.1)', color: '#f8fafc', borderRadius: '8px' }} />
               <Legend />
-              <Bar dataKey="InCharge" fill="#6366f1" radius={[4, 4, 0, 0]} />
-              <Bar dataKey="InControl" fill="#a855f7" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="attempts" fill="#6366f1" radius={[4, 4, 0, 0]} name="Quiz Attempts" />
             </BarChart>
           </ResponsiveContainer>
           </div>

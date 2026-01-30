@@ -3,12 +3,12 @@ const multer = require('multer');
 const { bulkImport, getUsers, exportUsers } = require('../controllers/adminController');
 const { 
   createQuiz, 
-  generateAIGeneratedQuiz, 
   updateQuiz, 
   getQuizzes, 
   getQuizById,
   approveQuiz, 
-  activateQuiz 
+  activateQuiz,
+  deleteQuiz 
 } = require('../controllers/quizAdminController');
 const { getAnalytics } = require('../controllers/analyticsController');
 const { auth, admin } = require('../middleware/auth');
@@ -28,11 +28,12 @@ router.get('/analytics', getAnalytics);
 
 // Quiz Management
 router.post('/quizzes', createQuiz); // Manual Create
-router.post('/quizzes/generate-ai', generateAIGeneratedQuiz); // AI Generate
+
 router.get('/quizzes', getQuizzes); // List
 router.get('/quizzes/:id', getQuizById); // Detail
 router.put('/quizzes/:id', updateQuiz); // Update
 router.put('/quizzes/:id/approve', approveQuiz); // Approve
 router.put('/quizzes/:id/activate', activateQuiz); // Activate
+router.delete('/quizzes/:id', deleteQuiz); // Delete
 
 module.exports = router;

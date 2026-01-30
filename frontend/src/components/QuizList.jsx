@@ -1,8 +1,8 @@
 import React from 'react';
-import { Edit, CheckCircle, Play, Eye } from 'lucide-react';
+import { Edit, CheckCircle, Play, Trash2 } from 'lucide-react';
 import axios from 'axios';
 
-const QuizList = ({ quizzes, onEdit, onRefresh, onView }) => {
+const QuizList = ({ quizzes, onEdit, onRefresh }) => {
 
   const handleApprove = async (id) => {
     if (!window.confirm('Are you sure you want to approve this quiz?')) return;
@@ -23,6 +23,16 @@ const QuizList = ({ quizzes, onEdit, onRefresh, onView }) => {
       onRefresh();
     } catch (err) {
       alert(err.response?.data?.error || 'Activation failed');
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this quiz? This action cannot be undone.')) return;
+    try {
+      await axios.delete(`http://localhost:5000/api/admin/quizzes/${id}`);
+      onRefresh();
+    } catch (err) {
+      alert(err.response?.data?.error || 'Deletion failed');
     }
   };
 
@@ -59,31 +69,25 @@ const QuizList = ({ quizzes, onEdit, onRefresh, onView }) => {
                 </td>
                 <td className="p-4 font-medium">{quiz.title}</td>
                 <td className="p-4">
-                  {quiz.generatedBy === 'AI' ? (
-                    <span className="text-accent-secondary flex items-center gap-1.5 font-medium">
-                       🤖 AI
-                    </span>
-                  ) : <span className="opacity-70">Manual</span>}
+                  <span className="opacity-70">Manual</span>
                 </td>
                 <td className="p-4 text-text-secondary">
                    {quiz.activeDate ? new Date(quiz.activeDate).toLocaleDateString() : '-'}
                 </td>
                 <td className="p-4">
                   <div className="flex gap-3">
+                    <button onClick={() => onEdit(quiz)} title="Edit" className="text-text-primary hover:text-accent-primary transition-colors">
+                      <Edit size={18} />
+                    </button>
+                    
                     <button 
-                        onClick={() => onView(quiz)} 
-                        title="View Details" 
-                        className="text-text-secondary hover:text-white transition-colors"
+                      onClick={() => handleDelete(quiz._id)} 
+                      title="Delete" 
+                      className="text-text-secondary hover:text-error transition-colors"
                     >
-                        <Eye size={18} />
+                      <Trash2 size={18} />
                     </button>
 
-                    {quiz.status !== 'ACTIVE' && quiz.status !== 'ARCHIVED' && (
-                      <button onClick={() => onEdit(quiz)} title="Edit" className="text-text-primary hover:text-accent-primary transition-colors">
-                        <Edit size={18} />
-                      </button>
-                    )}
-                    
                     {quiz.status === 'DRAFT' && (
                       <button onClick={() => handleApprove(quiz._id)} title="Approve" className="text-success hover:text-green-400 transition-colors">
                         <CheckCircle size={18} />
