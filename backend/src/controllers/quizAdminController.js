@@ -101,7 +101,7 @@ const getQuizzes = async (req, res) => {
     const query = {};
     if (status) query.status = status;
 
-    const quizzes = await Quiz.find(query).sort({ createdAt: -1 });
+    const quizzes = await Quiz.find(query).sort({ activeDate: -1 });
     res.json(quizzes);
   } catch (error) {
     res.status(500).json({ error: error.message });

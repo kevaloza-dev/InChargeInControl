@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import API_BASE_URL from '../config/apiConfig';
-import { Save, X, Trash2, Plus } from 'lucide-react';
+import { Save, X, Trash2, Plus, ArrowLeft } from 'lucide-react';
 
 const QuizEditor = ({ quiz, onSave, onCancel, readOnly = false }) => {
   const [formData, setFormData] = useState({
@@ -214,7 +214,17 @@ const QuizEditor = ({ quiz, onSave, onCancel, readOnly = false }) => {
   return (
     <div className="glass-card p-8 max-w-5xl mx-auto">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
-        <h2 className="text-2xl font-bold">{readOnly ? 'View Quiz' : (quiz ? 'Edit Quiz' : 'Create New Quiz')}</h2>
+        <div className="flex items-center gap-4">
+          <button 
+            type="button"
+            onClick={onCancel}
+            className="p-2 rounded-full hover:bg-white/5 text-text-secondary hover:text-white transition-all border border-transparent hover:border-white/10"
+            title="Go back to list"
+          >
+            <ArrowLeft size={24} />
+          </button>
+          <h2 className="text-2xl font-bold">{readOnly ? 'View Quiz' : (quiz ? 'Edit Quiz' : 'Create New Quiz')}</h2>
+        </div>
         
         <div className="flex items-center gap-3">
           <div className="flex items-center bg-white/5 px-4 py-2 rounded-xl border border-white/10">
